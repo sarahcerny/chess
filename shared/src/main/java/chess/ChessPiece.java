@@ -80,6 +80,7 @@ public class ChessPiece {
             chessMoves.addAll(chessMovesDiagonal);
             return chessMoves;
         }
+        //KING
         if (piece.getPieceType() == PieceType.KING) {
             Collection<ChessMove> chessMovesVertical1 = this.pieceMovesVertical1(board, myPosition, null);
             Collection<ChessMove> chessMovesHorizontal1 = this.pieceMovesHorizontal1(board, myPosition, null);
