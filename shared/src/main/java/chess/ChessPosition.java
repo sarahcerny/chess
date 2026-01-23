@@ -68,6 +68,7 @@ public class ChessPosition {
         if (this.col < 1) {
             return false;
         }
+        //validate
 
         return true;
     }
