@@ -92,6 +92,12 @@ public class ChessPiece {
             chessMoves.addAll(chessMovesDiagonal1);
             return chessMoves;
         }
+        //Knight
+        if (piece.getPieceType() == PieceType.KNIGHT) {
+            List<ChessMove> chessMoves = new ArrayList<>();
+            chessMoves.addAll(this.pieceMovesL(board, myPosition, null));
+            return chessMoves;
+        }
 
         return List.of();
     }
@@ -233,7 +239,8 @@ public class ChessPiece {
         }
         return chessMoves;
     }
-    private Collection<ChessMove> pieceMovesHorizontal1 (ChessBoard board, ChessPosition myPosition, PieceType pieceType) {
+
+    private Collection<ChessMove> pieceMovesHorizontal1(ChessBoard board, ChessPosition myPosition, PieceType pieceType) {
         Collection<ChessMove> chessMoves = new ArrayList<ChessMove>();
         /** horizontal 1 */
 
@@ -253,7 +260,7 @@ public class ChessPiece {
     /**
      * Vertical
      */
-    private Collection<ChessMove> pieceMovesVertical1 (ChessBoard board, ChessPosition myPosition, PieceType pieceType) {
+    private Collection<ChessMove> pieceMovesVertical1(ChessBoard board, ChessPosition myPosition, PieceType pieceType) {
         Collection<ChessMove> chessMoves = new ArrayList<ChessMove>();
         /** Vertical 1 */
 
@@ -269,7 +276,10 @@ public class ChessPiece {
 
         return chessMoves;
     }
-    /** Diagonal 1 */
+
+    /**
+     * Diagonal 1
+     */
     private Collection<ChessMove> pieceMovesDiagonal1(ChessBoard board, ChessPosition myPosition, PieceType pieceType) {
         Collection<ChessMove> chessMoves = new ArrayList<ChessMove>();
         /** Diagonal 1 */
@@ -294,6 +304,52 @@ public class ChessPiece {
 
         return chessMoves;
     }
+
+    /**
+     * Moves L
+     */
+    private Collection<ChessMove> pieceMovesL(ChessBoard board, ChessPosition myPosition, PieceType pieceType) {
+        Collection<ChessMove> chessMoves = new ArrayList<ChessMove>();
+        /** down Left */
+        ChessPosition newPosition = new ChessPosition(myPosition.getRow() - 1, myPosition.getColumn() - 2);
+        if (newPosition.validate()) {
+            chessMoves.add(new ChessMove(myPosition, newPosition, pieceType));
+        }
+        newPosition = new ChessPosition(myPosition.getRow() - 2, myPosition.getColumn() - 1);
+        if (newPosition.validate()) {
+            chessMoves.add(new ChessMove(myPosition, newPosition, pieceType));
+        }
+        /** down Right */
+        newPosition = new ChessPosition(myPosition.getRow() - 1, myPosition.getColumn() + 2);
+        if (newPosition.validate()) {
+            chessMoves.add(new ChessMove(myPosition, newPosition, pieceType));
+        }
+        newPosition = new ChessPosition(myPosition.getRow() - 2, myPosition.getColumn() + 1);
+        if (newPosition.validate()) {
+            chessMoves.add(new ChessMove(myPosition, newPosition, pieceType));
+        }
+        /** upper left */
+        newPosition = new ChessPosition(myPosition.getRow() + 1, myPosition.getColumn() - 2);
+        if (newPosition.validate()) {
+            chessMoves.add(new ChessMove(myPosition, newPosition, pieceType));
+        }
+        newPosition = new ChessPosition(myPosition.getRow() + 2, myPosition.getColumn() - 1);
+        if (newPosition.validate()) {
+            chessMoves.add(new ChessMove(myPosition, newPosition, pieceType));
+        }
+        /** upper right */
+        newPosition = new ChessPosition(myPosition.getRow() + 1, myPosition.getColumn() + 2);
+        if (newPosition.validate()) {
+            chessMoves.add(new ChessMove(myPosition, newPosition, pieceType));
+        }
+        newPosition = new ChessPosition(myPosition.getRow() + 2, myPosition.getColumn() + 1);
+        if (newPosition.validate()) {
+            chessMoves.add(new ChessMove(myPosition, newPosition, pieceType));
+        }
+
+        return chessMoves;
+    }
+    private boolean
 
     @Override
     public boolean equals(Object o) {
