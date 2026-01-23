@@ -51,4 +51,25 @@ public class ChessPosition {
     public int hashCode() {
         return Objects.hash(row, col);
     }
+
+    public boolean validate() {
+        if (this.row > 8) {
+            return false;
+        }
+
+        if (this.row < 1) {
+            return false;
+        }
+
+        if (this.col > 8) {
+            return false;
+        }
+
+        if (this.col < 1) {
+            return false;
+        }
+
+        return true;
+    }
 }
+
