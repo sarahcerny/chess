@@ -33,7 +33,7 @@ public class ChessPiece {
         ROOK,
         PAWN
     }
-
+    //instead of a boolean which i once had I am going to create a enum of valid invalid and Capture because I want it to test for capture if there is a peice.
     public enum MoveState{
         VALID,
         INVALID,
@@ -63,9 +63,11 @@ public class ChessPiece {
      */
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
         ChessPiece piece = board.getPiece(myPosition);
+        //BISHOP
         if (piece.getPieceType() == PieceType.BISHOP) {
             return this.pieceMovesDiagonal(board, myPosition, null);
         }
+        //ROOK
         if (piece.getPieceType() == PieceType.ROOK) {
             Collection<ChessMove> chessMovesVertical = this.pieceMovesVertical(board, myPosition, null);
             Collection<ChessMove> chessMovesHorizontal = this.pieceMovesHorizontal(board, myPosition, null);
@@ -75,6 +77,7 @@ public class ChessPiece {
             chessMoves.addAll(chessMovesHorizontal);
             return chessMoves;
         }
+        //QUEEN
         if (piece.getPieceType() == PieceType.QUEEN) {
             Collection<ChessMove> chessMovesVertical = this.pieceMovesVertical(board, myPosition, null);
             Collection<ChessMove> chessMovesHorizontal = this.pieceMovesHorizontal(board, myPosition, null);
@@ -110,12 +113,9 @@ public class ChessPiece {
             chessMoves.addAll(this.pieceMovesPawn(board, myPosition, null));
             return chessMoves;
         }
-
-
         return List.of();
     }
-
-
+    //Im creating genaric moves so that I can use these moves depending on how different pieces move.
     private Collection<ChessMove> pieceMovesDiagonal(ChessBoard board, ChessPosition myPosition, PieceType pieceType) {
         Collection<ChessMove> chessMoves = new ArrayList<ChessMove>();
 /** upper right  */
