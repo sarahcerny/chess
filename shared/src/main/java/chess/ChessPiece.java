@@ -208,10 +208,9 @@ public class ChessPiece {
     private Collection<ChessMove> pieceMovesHorizontal(ChessBoard board, ChessPosition myPosition, PieceType pieceType) {
         Collection<ChessMove> chessMoves = new ArrayList<ChessMove>();
         /** horizontal */
-        int rowChange = 0;
         int columnChange = 1;
         while (columnChange >= 1 && columnChange < 8) {
-            ChessPosition newPosition = new ChessPosition(myPosition.getRow() + rowChange, myPosition.getColumn() + columnChange);
+            ChessPosition newPosition = new ChessPosition(myPosition.getRow(), myPosition.getColumn() + columnChange);
 
             MoveState moveState = validateMove(board, this, myPosition, newPosition);
             if (moveState == MoveState.VALID) {
@@ -225,10 +224,9 @@ public class ChessPiece {
             columnChange++;
         }
 
-        rowChange = 0;
         columnChange = 1;
         while (columnChange >= 1 && columnChange < 8) {
-            ChessPosition newPosition = new ChessPosition(myPosition.getRow() + rowChange, myPosition.getColumn() - columnChange);
+            ChessPosition newPosition = new ChessPosition(myPosition.getRow(), myPosition.getColumn() - columnChange);
 
             MoveState moveState = validateMove(board, this, myPosition, newPosition);
             if (moveState == MoveState.VALID) {
@@ -251,9 +249,8 @@ public class ChessPiece {
         Collection<ChessMove> chessMoves = new ArrayList<ChessMove>();
         /** Vertical */
         int rowChange = 1;
-        int columnChange = 0;
         while (rowChange >= 1 && rowChange < 8) {
-            ChessPosition newPosition = new ChessPosition(myPosition.getRow() + rowChange, myPosition.getColumn() + columnChange);
+            ChessPosition newPosition = new ChessPosition(myPosition.getRow() + rowChange, myPosition.getColumn());
 
             MoveState moveState = validateMove(board, this, myPosition, newPosition);
             if (moveState == MoveState.VALID) {
@@ -267,9 +264,8 @@ public class ChessPiece {
             rowChange++;
         }
         rowChange = 1;
-        columnChange = 0;
         while (rowChange >= 1 && rowChange < 8) {
-            ChessPosition newPosition = new ChessPosition(myPosition.getRow() - rowChange, myPosition.getColumn() + columnChange);
+            ChessPosition newPosition = new ChessPosition(myPosition.getRow() - rowChange, myPosition.getColumn());
 
             MoveState moveState = validateMove(board, this, myPosition, newPosition);
             if (moveState == MoveState.VALID) {
