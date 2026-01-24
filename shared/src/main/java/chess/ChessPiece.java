@@ -118,6 +118,7 @@ public class ChessPiece {
     //Im creating genaric moves so that I can use these moves depending on how different pieces move.
     private Collection<ChessMove> pieceMovesDiagonal(ChessBoard board, ChessPosition myPosition, PieceType pieceType) {
         Collection<ChessMove> chessMoves = new ArrayList<ChessMove>();
+//I am going to move a peice up and to the right
 /** upper right  */
         int currentRowChange = 1;
         int currentColumnChange = 1;
@@ -140,6 +141,7 @@ public class ChessPiece {
 
 
         }
+//I am going to move a piece up and to the left
 /** upper left  */
         int upperleftRowChange = 1;
         int upperleftColumnChange = 1;
@@ -159,7 +161,7 @@ public class ChessPiece {
             upperleftRowChange++;
             upperleftColumnChange++;
         }
-
+//I am going to move a piece down and to the left
 /** down left  */
         int downleftRowChange = 1;
         int downleftColumnChange = 1;
