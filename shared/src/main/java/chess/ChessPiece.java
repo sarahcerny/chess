@@ -245,7 +245,7 @@ public class ChessPiece {
         }
         return chessMoves;
     }
-
+    // creating this function so that when I have a piece that checks for vertical
     /**
      * Vertical
      */
@@ -284,7 +284,7 @@ public class ChessPiece {
         }
         return chessMoves;
     }
-
+    //this is mainly for the case of king where I can move 1 space in every direction
     private Collection<ChessMove> pieceMovesHorizontal1(ChessBoard board, ChessPosition myPosition, PieceType pieceType) {
         Collection<ChessMove> chessMoves = new ArrayList<ChessMove>();
         /** horizontal 1 */
@@ -300,10 +300,11 @@ public class ChessPiece {
         if (moveState == MoveState.VALID || moveState == MoveState.CAPTURE) {
             chessMoves.add(new ChessMove(myPosition, newPosition, pieceType));
         }
-
+        // for my move state here I need to see if it is valid OR if there is a piece of the other color and need to CAPTURE1
+        //  I dont need to have my ++ because I only want to move once
         return chessMoves;
     }
-
+    // I am using a private case because It is so my variables are in my global
     /**
      * Vertical
      */
@@ -316,7 +317,7 @@ public class ChessPiece {
         if (moveState == MoveState.VALID || moveState == MoveState.CAPTURE) {
             chessMoves.add(new ChessMove(myPosition, newPosition, pieceType));
         }
-
+        // I need a OR phrase because I can either move Valid or I cant move and need to capture.
         newPosition = new ChessPosition(myPosition.getRow() - 1, myPosition.getColumn());
         moveState = validateMove(board, this, myPosition, newPosition);
         if (moveState == MoveState.VALID || moveState == MoveState.CAPTURE) {
