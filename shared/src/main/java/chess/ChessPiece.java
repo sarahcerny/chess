@@ -181,6 +181,7 @@ public class ChessPiece {
             downleftRowChange++;
             downleftColumnChange++;
         }
+    // I want to move this piece down and to the right.
 /** down right  */
         int downrightRowChange = 1;
         int downrightColumnChange = 1;
@@ -203,7 +204,7 @@ public class ChessPiece {
 
         return chessMoves;
     }
-
+// now I am creating a piece Moves Horizontal for pieces like rook and queen
     /**
      * horizontal
      */
@@ -213,19 +214,20 @@ public class ChessPiece {
         int columnChange = 1;
         while (columnChange >= 1 && columnChange < 8) {
             ChessPosition newPosition = new ChessPosition(myPosition.getRow(), myPosition.getColumn() + columnChange);
-
+            // We created the enum MoveState so that we are able to use them sorta like a boolean where I can test for Validity and capture.
             MoveState moveState = validateMove(board, this, myPosition, newPosition);
             if (moveState == MoveState.VALID) {
                 chessMoves.add(new ChessMove(myPosition, newPosition, pieceType));
             } else if (moveState == MoveState.CAPTURE) {
                 chessMoves.add(new ChessMove(myPosition, newPosition, pieceType));
                 break;
+            //I have to break this for if capture is valid.
             } else {
                 break;
             }
             columnChange++;
         }
-
+        // no longer need rowChange because I can just leave it out to be simpler
         columnChange = 1;
         while (columnChange >= 1 && columnChange < 8) {
             ChessPosition newPosition = new ChessPosition(myPosition.getRow(), myPosition.getColumn() - columnChange);
