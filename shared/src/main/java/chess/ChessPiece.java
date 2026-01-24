@@ -420,42 +420,55 @@ public class ChessPiece {
             var newPosition = new ChessPosition(myPosition.getRow() + 1, myPosition.getColumn());
             MoveState moveState = validateMove(board, this, myPosition, newPosition);
             if (moveState == MoveState.VALID) {
-                PieceType promotionType = null;
                 if (newPosition.getRow() == 8) {
-                    promotionType = PieceType.QUEEN;
+                    chessMoves.add(new ChessMove(myPosition, newPosition, PieceType.QUEEN));
+                    chessMoves.add(new ChessMove(myPosition, newPosition, PieceType.ROOK));
+                    chessMoves.add(new ChessMove(myPosition, newPosition, PieceType.BISHOP));
+                    chessMoves.add(new ChessMove(myPosition, newPosition, PieceType.KNIGHT));
+                } else {
+                    chessMoves.add(new ChessMove(myPosition, newPosition, null));
                 }
-                chessMoves.add(new ChessMove(myPosition, newPosition, promotionType));
+
+                if (myPosition.getRow() == 2) {
+                    newPosition = new ChessPosition(myPosition.getRow() +2 , myPosition.getColumn());
+                    moveState = validateMove(board, this, myPosition, newPosition);
+                    if (moveState == MoveState.VALID) {
+                        if (newPosition.getRow() == 8) {
+                            chessMoves.add(new ChessMove(myPosition, newPosition, PieceType.QUEEN));
+                            chessMoves.add(new ChessMove(myPosition, newPosition, PieceType.ROOK));
+                            chessMoves.add(new ChessMove(myPosition, newPosition, PieceType.BISHOP));
+                            chessMoves.add(new ChessMove(myPosition, newPosition, PieceType.KNIGHT));
+                        } else {
+                            chessMoves.add(new ChessMove(myPosition, newPosition, null));
+                        }
+                    }
+                }
             }
 
-            if (myPosition.getRow() == 2) {
-                newPosition = new ChessPosition(myPosition.getRow() +2 , myPosition.getColumn());
-                moveState = validateMove(board, this, myPosition, newPosition);
-                if (moveState == MoveState.VALID) {
-                    PieceType promotionType = null;
-                    if (newPosition.getRow() == 8) {
-                        promotionType = PieceType.QUEEN;
-                    }
-                    chessMoves.add(new ChessMove(myPosition, newPosition, promotionType));
-                }
-            }
             // I can also capture diagonal
             newPosition = new ChessPosition(myPosition.getRow() + 1, myPosition.getColumn() + 1);
             moveState = validateMove(board, this, myPosition, newPosition);
             if (moveState == MoveState.CAPTURE) {
-                PieceType promotionType = null;
                 if (newPosition.getRow() == 8) {
-                    promotionType = PieceType.QUEEN;
+                    chessMoves.add(new ChessMove(myPosition, newPosition, PieceType.QUEEN));
+                    chessMoves.add(new ChessMove(myPosition, newPosition, PieceType.ROOK));
+                    chessMoves.add(new ChessMove(myPosition, newPosition, PieceType.BISHOP));
+                    chessMoves.add(new ChessMove(myPosition, newPosition, PieceType.KNIGHT));
+                } else {
+                    chessMoves.add(new ChessMove(myPosition, newPosition, null));
                 }
-                chessMoves.add(new ChessMove(myPosition, newPosition, promotionType));
             }
             newPosition = new ChessPosition(myPosition.getRow() + 1, myPosition.getColumn() - 1);
             moveState = validateMove(board, this, myPosition, newPosition);
             if (moveState == MoveState.CAPTURE) {
-                PieceType promotionType = null;
                 if (newPosition.getRow() == 8) {
-                    promotionType = PieceType.QUEEN;
+                    chessMoves.add(new ChessMove(myPosition, newPosition, PieceType.QUEEN));
+                    chessMoves.add(new ChessMove(myPosition, newPosition, PieceType.ROOK));
+                    chessMoves.add(new ChessMove(myPosition, newPosition, PieceType.BISHOP));
+                    chessMoves.add(new ChessMove(myPosition, newPosition, PieceType.KNIGHT));
+                } else {
+                    chessMoves.add(new ChessMove(myPosition, newPosition, null));
                 }
-                chessMoves.add(new ChessMove(myPosition, newPosition, promotionType));
             }
         }
 
@@ -464,22 +477,27 @@ public class ChessPiece {
             var newPosition = new ChessPosition(myPosition.getRow() - 1, myPosition.getColumn());
             MoveState moveState = validateMove(board, this, myPosition, newPosition);
             if (moveState == MoveState.VALID) {
-                PieceType promotionType = null;
                 if (newPosition.getRow() == 1) {
-                    promotionType = PieceType.QUEEN;
+                    chessMoves.add(new ChessMove(myPosition, newPosition, PieceType.QUEEN));
+                    chessMoves.add(new ChessMove(myPosition, newPosition, PieceType.ROOK));
+                    chessMoves.add(new ChessMove(myPosition, newPosition, PieceType.BISHOP));
+                    chessMoves.add(new ChessMove(myPosition, newPosition, PieceType.KNIGHT));
+                } else {
+                    chessMoves.add(new ChessMove(myPosition, newPosition, null));
                 }
-                chessMoves.add(new ChessMove(myPosition, newPosition, promotionType));
-            }
-
-            if (myPosition.getRow() == 7) {
-                newPosition = new ChessPosition(myPosition.getRow() - 2, myPosition.getColumn());
-                moveState = validateMove(board, this, myPosition, newPosition);
-                if (moveState == MoveState.VALID) {
-                    PieceType promotionType = null;
-                    if (newPosition.getRow() == 1) {
-                        promotionType = PieceType.QUEEN;
+                if (myPosition.getRow() == 7) {
+                    newPosition = new ChessPosition(myPosition.getRow() - 2, myPosition.getColumn());
+                    moveState = validateMove(board, this, myPosition, newPosition);
+                    if (moveState == MoveState.VALID) {
+                        if (newPosition.getRow() == 1) {
+                            chessMoves.add(new ChessMove(myPosition, newPosition, PieceType.QUEEN));
+                            chessMoves.add(new ChessMove(myPosition, newPosition, PieceType.ROOK));
+                            chessMoves.add(new ChessMove(myPosition, newPosition, PieceType.BISHOP));
+                            chessMoves.add(new ChessMove(myPosition, newPosition, PieceType.KNIGHT));
+                        } else {
+                            chessMoves.add(new ChessMove(myPosition, newPosition, null));
+                        }
                     }
-                    chessMoves.add(new ChessMove(myPosition, newPosition, promotionType));
                 }
             }
             // I can also capture diagonal
@@ -488,18 +506,25 @@ public class ChessPiece {
             if (moveState == MoveState.CAPTURE) {
                 PieceType promotionType = null;
                 if (newPosition.getRow() == 1) {
-                    promotionType = PieceType.QUEEN;
+                    chessMoves.add(new ChessMove(myPosition, newPosition, PieceType.QUEEN));
+                    chessMoves.add(new ChessMove(myPosition, newPosition, PieceType.ROOK));
+                    chessMoves.add(new ChessMove(myPosition, newPosition, PieceType.BISHOP));
+                    chessMoves.add(new ChessMove(myPosition, newPosition, PieceType.KNIGHT));
+                } else {
+                    chessMoves.add(new ChessMove(myPosition, newPosition, null));
                 }
-                chessMoves.add(new ChessMove(myPosition, newPosition, promotionType));
             }
             newPosition = new ChessPosition(myPosition.getRow() - 1, myPosition.getColumn() - 1);
             moveState = validateMove(board, this, myPosition, newPosition);
             if (moveState == MoveState.CAPTURE) {
-                PieceType promotionType = null;
                 if (newPosition.getRow() == 1) {
-                    promotionType = PieceType.QUEEN;
+                    chessMoves.add(new ChessMove(myPosition, newPosition, PieceType.QUEEN));
+                    chessMoves.add(new ChessMove(myPosition, newPosition, PieceType.ROOK));
+                    chessMoves.add(new ChessMove(myPosition, newPosition, PieceType.BISHOP));
+                    chessMoves.add(new ChessMove(myPosition, newPosition, PieceType.KNIGHT));
+                } else {
+                    chessMoves.add(new ChessMove(myPosition, newPosition, null));
                 }
-                chessMoves.add(new ChessMove(myPosition, newPosition, promotionType));
             }
         }
 
