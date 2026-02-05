@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
+import java.util.*;
 
 
 /**
@@ -118,7 +119,7 @@ public class ChessPiece {
     //Im creating genaric moves so that I can use these moves depending on how different pieces move.
     private Collection<ChessMove> pieceMovesDiagonal(ChessBoard board, ChessPosition myPosition, PieceType pieceType) {
         Collection<ChessMove> chessMoves = new ArrayList<ChessMove>();
-//I am going to move a peice up and to the right
+//I am going to move a piece up and to the right
 /** upper right  */
         int currentRowChange = 1;
         int currentColumnChange = 1;
