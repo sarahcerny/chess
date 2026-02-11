@@ -104,9 +104,25 @@ public class ChessGame {
         return null;
     }
     public boolean isInCheck(TeamColor teamColor) {
-        ChessPosition KingPosition = null;
+        ChessPosition kingPosition = findKingPosition(teamColor);
 
+        if(kingPosition == null) {
+            return false;
+        }
+        for (int i = 0; i < 8; i++) {
+            for (int j = 0; j < 8; j++){
+                ChessPosition oppPosition = new ChessPosition(i +1, j + 1);
+                ChessPiece piece = board.getPiece(oppPosition);
 
+                if (piece != null && piece.getTeamColor() != teamColor) {
+                    for(ChessMove move : piece.pieceMoves(board, oppPosition)) {
+                        if (move.getEndPosition().equals(kingPosition)) {
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
     return false;
     }
 
