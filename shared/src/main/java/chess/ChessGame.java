@@ -214,5 +214,13 @@ public class ChessGame {
     public ChessBoard getBoard() {
         return board;
     }
+    private boolean wouldLeaveKingInCheck(ChessMove move, TeamColor teamColor) {
+        ChessBoard testBoard = copyBoard();
 
+        ChessPiece piece = testBoard.getPiece(move.getStartPosition());
+        testBoard.addPiece(move.getEndPosition(), piece);
+        testBoard.addPiece(move.getStartPosition(), null);
+
+        return isKinginCheckOnBoard(teamColor, testBoard);
+    }
 }
