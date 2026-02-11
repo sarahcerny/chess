@@ -2,6 +2,7 @@ package chess;
 
 import java.util.Collection;
 import java.util.Objects;
+import java.util.ArrayList;
 
 /**
  * For a class that can manage a chess game, making moves on a board
@@ -67,12 +68,12 @@ public class ChessGame {
      * startPosition
      */
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
-        //ChessPiece piece = board.getPiece(startPosition);
-
-
-        //filter moves that they think are legal but cant because of checkmate issues
-
-        throw new RuntimeException("Not implemented");}
+        ChessPiece piece = board.getPiece(startPosition);
+        if(piece == null) {
+            return null;
+        }
+        return piece.pieceMoves(board, startPosition);
+    }
 
     /**
      * Makes a move in a chess game
@@ -115,13 +116,13 @@ public class ChessGame {
                 ChessPosition currentPosition = new ChessPosition(i + 1, j + 1);
                 ChessPiece piece = board.getPiece(currentPosition);
 
-                if(piece != null && piece.getTeamColor() != teamColor) {
+                if (piece != null && piece.getTeamColor() != teamColor) {
 
-                    Collection<ChessMove> currPieceMoves =
+                    Collection<ChessMove> currrentPieceMoves =
                             piece.pieceMoves(board, currentPosition);
 
-                    for(ChessMove currMove : currPieceMoves) {
-                        if(currMove.getEndPosition().equals(myKing)) {
+                    for(ChessMove currrentMove : currrentPieceMoves) {
+                        if(currrentMove.getEndPosition().equals(myKing)) {
                             return true;
                         }
                     }
