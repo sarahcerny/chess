@@ -53,8 +53,12 @@ public class ChessGame {
      * startPosition
      */
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
-        throw new RuntimeException("Not implemented");
-    }
+        //ChessPiece piece = board.getPiece(startPosition);
+
+
+        //filter moves that they think are legal but cant because of checkmate issues
+
+        throw new RuntimeException("Not implemented");}
 
     /**
      * Makes a move in a chess game
@@ -103,7 +107,7 @@ public class ChessGame {
      * @param board the new board to use
      */
     public void setBoard(ChessBoard board) {
-        throw new RuntimeException("Not implemented");
+        this.gameBoard = board;
     }
 
     /**
@@ -112,6 +116,7 @@ public class ChessGame {
      * @return the chessboard
      */
     public ChessBoard getBoard() {
-        throw new RuntimeException("Not implemented");
+        return gameBoard;
     }
+
 }
