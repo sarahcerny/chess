@@ -223,4 +223,17 @@ public class ChessGame {
 
         return isKinginCheckOnBoard(teamColor, testBoard);
     }
+    private ChessBoard copyBoard() {
+        ChessBoard copy = new ChessBoard();
+        for(int i = 0; i < 8; i++) {
+            for(int j = 0; j < 8; j++) {
+                ChessPosition currentPosition = new ChessPosition(i + 1, j + 1);
+                ChessPiece piece = board.getPiece(currentPosition);
+                if(piece != null) {
+                    copy.addPiece(currentPosition, new ChessPiece(piece.getTeamColor(), piece.getPieceType()));
+                }
+            }
+        }
+        return copy;
+    }
 }
