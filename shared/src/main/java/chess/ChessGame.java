@@ -90,6 +90,19 @@ public class ChessGame {
      * @param teamColor which team to check for check
      * @return True if the specified team is in check
      */
+    private ChessPosition findKingPosition(TeamColor teamColor) {
+        for (int i = 0; i < 8; i++) {
+            for(int j = 0; j < 8; j++){
+                ChessPosition currentPosition = new ChessPosition(i +1, j + 1);
+                ChessPiece piece = board.getPiece(currentPosition);
+                if (piece != null && piece.getPieceType() == ChessPiece.PieceType.KING && piece.getTeamColor() == teamColor) {
+                    return currentPosition;
+                }
+            }
+        }
+
+        return null;
+    }
     public boolean isInCheck(TeamColor teamColor) {
         ChessPosition KingPosition = null;
 
