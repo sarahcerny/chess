@@ -104,34 +104,39 @@ public class ChessGame {
         return null;
     }
     public boolean isInCheck(TeamColor teamColor) {
-        ChessPosition kingPosition = findKingPosition(teamColor);
 
-        if(kingPosition == null) {
+        ChessPosition myKing = findKingPosition(teamColor);
+        if(myKing == null) {
             return false;
         }
-        for (int i = 0; i < 8; i++) {
-            for (int j = 0; j < 8; j++){
-                ChessPosition oppPosition = new ChessPosition(i +1, j + 1);
-                ChessPiece piece = board.getPiece(oppPosition);
+        for(int i = 0; i < 8; i++) {
+            for(int j = 0; j < 8; j++) {
 
-                if (piece != null && piece.getTeamColor() != teamColor) {
-                    for(ChessMove move : piece.pieceMoves(board, oppPosition)) {
-                        if (move.getEndPosition().equals(kingPosition)) {
+                ChessPosition currentPosition = new ChessPosition(i + 1, j + 1);
+                ChessPiece piece = board.getPiece(currentPosition);
+
+                if(piece != null && piece.getTeamColor() != teamColor) {
+
+                    Collection<ChessMove> currPieceMoves =
+                            piece.pieceMoves(board, currentPosition);
+
+                    for(ChessMove currMove : currPieceMoves) {
+                        if(currMove.getEndPosition().equals(myKing)) {
                             return true;
                         }
                     }
                 }
             }
         }
-    return false;
+        return false;
     }
 
-    /**
-     * Determines if the given team is in checkmate
-     *
-     * @param teamColor which team to check for checkmate
-     * @return True if the specified team is in checkmate
-     */
+        /**
+         * Determines if the given team is in checkmate
+         *
+         * @param teamColor which team to check for checkmate
+         * @return True if the specified team is in checkmate
+         */
     public boolean isInCheckmate(TeamColor teamColor) {
         throw new RuntimeException("Not implemented");
     }
