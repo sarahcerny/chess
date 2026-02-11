@@ -72,7 +72,15 @@ public class ChessGame {
         if(piece == null) {
             return null;
         }
-        return piece.pieceMoves(board, startPosition);
+        Collection<ChessMove> allMoves = piece.pieceMoves(board, startPosition);
+        Collection<ChessMove> validMoves = new ArrayList<>();
+
+        for(ChessMove move : allMoves) {
+            if(!wouldLeaveKingInCheck(move, piece.getTeamColor())) {
+                validMoves.add(move);
+            }
+        }
+        return validMoves;
     }
 
     /**
