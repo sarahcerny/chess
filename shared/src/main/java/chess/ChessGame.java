@@ -1,6 +1,7 @@
 package chess;
 
 import java.util.Collection;
+import java.util.Objects;
 
 /**
  * For a class that can manage a chess game, making moves on a board
@@ -9,15 +10,28 @@ import java.util.Collection;
  * signature of the existing methods.
  */
 public class ChessGame {
-    private TeamColor teamTurn;
-    private ChessBoard gameBoard;
+    private TeamColor turn;
+    private ChessBoard board;
     private ChessBoard testBoard;
 
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof ChessGame chessGame)) {
+            return false;
+        }
+        return turn == chessGame.turn && Objects.equals(board, chessGame.board) && Objects.equals(testBoard, chessGame.testBoard);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(turn, board, testBoard);
+    }
+
     public ChessGame() {
-        this.teamTurn = TeamColor.WHITE;
-        this.gameBoard =  new ChessBoard();
-        gameBoard.resetBoard();
-        testBoard = null;
+        this.turn = TeamColor.WHITE;
+        this.board =  new ChessBoard();
+        this.board.resetBoard();
+
 
     }
 
@@ -25,7 +39,7 @@ public class ChessGame {
      * @return Which team's turn it is
      */
     public TeamColor getTeamTurn() {
-        return teamTurn;
+        return turn;
     }
 
     /**
@@ -34,7 +48,7 @@ public class ChessGame {
      * @param team the team whose turn it is
      */
     public void setTeamTurn(TeamColor team) {
-        teamTurn = team;
+        turn = team;
     }
 
     /**
@@ -77,7 +91,10 @@ public class ChessGame {
      * @return True if the specified team is in check
      */
     public boolean isInCheck(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+        ChessPosition KingPosition = null;
+
+
+    return false;
     }
 
     /**
@@ -107,7 +124,7 @@ public class ChessGame {
      * @param board the new board to use
      */
     public void setBoard(ChessBoard board) {
-        this.gameBoard = board;
+        this.board = board;
     }
 
     /**
@@ -116,7 +133,7 @@ public class ChessGame {
      * @return the chessboard
      */
     public ChessBoard getBoard() {
-        return gameBoard;
+        return board;
     }
 
 }
