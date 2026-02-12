@@ -579,11 +579,6 @@ public class ChessPiece {
                 return MoveState.INVALID;
             }
 
-            // if the spot is owned by the other color and it is a KING.  Not a valid move.
-            if (newChessPositionPiece.getPieceType() == PieceType.KING) {
-                return MoveState.INVALID;
-            }
-
             return MoveState.CAPTURE;
         }
 

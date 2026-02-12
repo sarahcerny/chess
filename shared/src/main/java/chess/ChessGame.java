@@ -270,17 +270,25 @@ public class ChessGame {
     }
     private ChessBoard copyBoard() {
         ChessBoard copy = new ChessBoard();
-        for(int i = 0; i < 8; i++) {
-            for(int j = 0; j < 8; j++) {
-                ChessPosition currentPosition = new ChessPosition(i + 1, j + 1);
-                ChessPiece piece = board.getPiece(currentPosition);
+
+        for (int i = 1; i <= 8; i++) {
+            for (int j = 1; j <= 8; j++) {
+                copy.addPiece(new ChessPosition(i, j), null);
+            }
+        }
+        for(int i = 1; i <= 8; i++) {
+            for(int j = 1; j <= 8; j++) {
+                ChessPosition pos = new ChessPosition(i, j);
+                ChessPiece piece = board.getPiece(pos);
                 if(piece != null) {
-                    copy.addPiece(currentPosition, new ChessPiece(piece.getTeamColor(), piece.getPieceType()));
+                    copy.addPiece(pos,
+                            new ChessPiece(piece.getTeamColor(), piece.getPieceType()));
                 }
             }
         }
         return copy;
     }
+
 
     private boolean isKinginCheckOnBoard(TeamColor teamColor, ChessBoard testBoard) {
         ChessPosition kingPosition = findKingPositionOnBoard(teamColor, testBoard);
