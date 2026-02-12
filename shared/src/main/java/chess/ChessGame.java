@@ -114,32 +114,49 @@ public class ChessGame {
     }
     public boolean isInCheck(TeamColor teamColor) {
 
-        ChessPosition myKing = findKingPosition(teamColor);
-        if(myKing == null) {
+        ChessPosition kingPosition = null;
+
+        for (int i = 1; i <= 8; i++) {
+            for (int j = 1; j <= 8; j++) {
+
+                ChessPosition pos = new ChessPosition(i, j);
+                ChessPiece piece = board.getPiece(pos);
+                if (piece != null &&
+                        piece.getTeamColor() == teamColor &&
+                        piece.getPieceType() == ChessPiece.PieceType.KING) {
+
+                    kingPosition = pos;
+                }
+            }
+        }
+        if (kingPosition == null) {
             return false;
         }
-        for(int i = 0; i < 8; i++) {
-            for(int j = 0; j < 8; j++) {
+        for (int i = 1; i <= 8; i++) {
+            for (int j = 1; j <= 8; j++) {
 
-                ChessPosition currentPosition = new ChessPosition(i + 1, j + 1);
-                ChessPiece piece = board.getPiece(currentPosition);
+                ChessPosition pos = new ChessPosition(i, j);
+                ChessPiece piece = board.getPiece(pos);
 
-                if (piece != null && piece.getTeamColor() != teamColor) {
+                if (piece != null &&
+                        piece.getTeamColor() != teamColor) {
 
-                    Collection<ChessMove> currentPieceMoves = piece.pieceMoves(board, currentPosition);
+                    Collection<ChessMove> moves =
+                            piece.pieceMoves(board, pos);
 
-                    for(ChessMove currentMove : currentPieceMoves) {
-                        if(currentMove.getEndPosition().equals(myKing)) {
+                    for (ChessMove move : moves) {
+                        if (move.getEndPosition().equals(kingPosition)) {
                             return true;
                         }
                     }
                 }
             }
         }
+
         return false;
     }
 
-        /**
+    /**
          * Determines if the given team is in checkmate
          *
          * @param teamColor which team to check for checkmate
