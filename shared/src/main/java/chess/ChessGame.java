@@ -130,35 +130,6 @@ public class ChessGame {
     public ChessBoard getBoard() {
         return board;
     }
-    private boolean wouldLeaveKingInCheck(ChessMove move, TeamColor teamColor) {
-        ChessBoard testBoard = copyBoard();
-
-        ChessPiece piece = testBoard.getPiece(move.getStartPosition());
-        testBoard.addPiece(move.getEndPosition(), piece);
-        testBoard.addPiece(move.getStartPosition(), null);
-
-        return isKinginCheckOnBoard(teamColor, testBoard);
-    }
-    private ChessBoard copyBoard() {
-        ChessBoard copy = new ChessBoard();
-
-        for (int i = 1; i <= 8; i++) {
-            for (int j = 1; j <= 8; j++) {
-                copy.addPiece(new ChessPosition(i, j), null);
-            }
-        }
-        for(int i = 1; i <= 8; i++) {
-            for(int j = 1; j <= 8; j++) {
-                ChessPosition pos = new ChessPosition(i, j);
-                ChessPiece piece = board.getPiece(pos);
-                if(piece != null) {
-                    copy.addPiece(pos,
-                            new ChessPiece(piece.getTeamColor(), piece.getPieceType()));
-                }
-            }
-        }
-        return copy;
-    }
 
 
     private boolean isKinginCheckOnBoard(TeamColor teamColor, ChessBoard testBoard) {
