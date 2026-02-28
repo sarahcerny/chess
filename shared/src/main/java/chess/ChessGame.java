@@ -1,5 +1,7 @@
 package chess;
 
+import org.junit.jupiter.params.shadow.com.univocity.parsers.common.beans.PropertyWrapper;
+
 import java.util.Collection;
 import java.util.Objects;
 import java.util.ArrayList;
@@ -68,8 +70,67 @@ public class ChessGame {
      * startPosition
      */
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
+        var validMoves = new ArrayList<ChessMove>();
 
-        throw new RuntimeException("Not implemented");}
+        ChessPiece piece = this.getBoard().getPiece(startPosition);
+        var potentialMoves = piece.pieceMoves(this.getBoard(), startPosition);
+
+
+
+
+        return validMoves;
+    }
+
+    private boolean validBoard(ChessPiece piece, ChessMove move) {
+        boolean valid = false;
+        var potentialBoard = cloneBoard(this.getBoard());
+        potentialBoard.addPiece(move.getStartPosition(),null);
+        potentialBoard.addPiece(move.getEndPosition(), clonePiece(piece));
+
+        var kingPosition = findKingPosition(potentialBoard, piece.getTeamColor());
+
+
+
+        return valid;
+    }
+
+    private ChessPosition findKingPosition(ChessBoard board, TeamColor color){
+        ChessPosition kingPosition = null;
+        for(int i = 1; i <=8; i++ ){
+            for(int j = 1; j <=8; j++ ) {
+                var position = new ChessPosition(i, j);
+                ChessPiece potentialPiece = board.getPiece(position);
+                if (potentialPiece != null) {
+                    if(potentialPiece.getPieceType() == ChessPiece.PieceType.KING
+                            && potentialPiece.getTeamColor() == color) {
+                        kingPosition = new ChessPosition(i,j);
+
+                    }
+                }
+            }
+        }
+        return kingPosition;
+    }
+    private ChessBoard cloneBoard(ChessBoard thatBoard) {
+        var potentialBoard = new ChessBoard();
+
+        for(int i = 1; i <=8; i++ ){
+            for(int j = 1; j <=8; j++ ) {
+                var position = new ChessPosition(i, j);
+                ChessPiece piece = thatBoard.getPiece(position);
+                if (piece != null) {
+                    var potentialPiece = clonePiece(piece);
+                    potentialBoard.addPiece(position, piece);
+                }
+            }
+        }
+
+        return potentialBoard;
+    }
+    private ChessPiece clonePiece(ChessPiece thatPiece){
+        var potentialPiece = new ChessPiece(thatPiece.getTeamColor(), thatPiece.getPieceType());
+        return potentialPiece;
+    }
 
     /**
      * Makes a move in a chess game
