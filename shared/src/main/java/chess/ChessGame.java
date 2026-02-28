@@ -157,9 +157,24 @@ public class ChessGame {
      * @throws InvalidMoveException if move is invalid
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
+        var validMoves = validMoves(move.getStartPosition());
+        for(ChessMove currentMove: validMoves){
+            if(movesAreEqual(move, currentMove) ){
 
-        throw new RuntimeException("Not implemented"); }
+            }
+        }
+    }
+    private boolean movesAreEqual(ChessMove move1, ChessMove move2){
 
+        if(move1.getStartPosition().getRow() == move2.getStartPosition().getRow() &&
+                move1.getStartPosition().getColumn() == move2.getStartPosition().getColumn() &&
+                move1.getEndPosition().getRow() == move2.getEndPosition().getRow() &&
+                move1.getEndPosition().getColumn() == move2.getEndPosition().getColumn()){
+            return true;
+        }
+
+        return false;
+    }
 
     /**
      * Determines if the given team is in check
