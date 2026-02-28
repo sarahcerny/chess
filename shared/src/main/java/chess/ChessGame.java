@@ -74,9 +74,11 @@ public class ChessGame {
 
         ChessPiece piece = this.getBoard().getPiece(startPosition);
         var potentialMoves = piece.pieceMoves(this.getBoard(), startPosition);
-
-
-
+        for(ChessMove currentMove : potentialMoves) {
+            if(validBoard(piece, currentMove)){
+                validMoves.add(currentMove);
+            }
+        }
 
         return validMoves;
     }
