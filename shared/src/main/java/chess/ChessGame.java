@@ -158,11 +158,23 @@ public class ChessGame {
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
         var validMoves = validMoves(move.getStartPosition());
+        if(isInValidMove(move, validMoves)){
+            var board = this.getBoard();
+            var piece = board.getPiece(move.getStartPosition());
+            board.addPiece(move.getStartPosition(),null);
+            board.addPiece(move.getEndPosition(), piece);
+        } else{
+            throw new InvalidMoveException();
+        }
+
+    }
+    private boolean isInValidMove(ChessMove move, Collection<ChessMove> validMoves) {
         for(ChessMove currentMove: validMoves){
             if(movesAreEqual(move, currentMove) ){
-
+                return true;
             }
         }
+        return false;
     }
     private boolean movesAreEqual(ChessMove move1, ChessMove move2){
 
