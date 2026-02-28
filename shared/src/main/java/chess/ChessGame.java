@@ -73,6 +73,9 @@ public class ChessGame {
         var validMoves = new ArrayList<ChessMove>();
 
         ChessPiece piece = this.getBoard().getPiece(startPosition);
+        if(piece == null){
+            return null;
+        }
         var potentialMoves = piece.pieceMoves(this.getBoard(), startPosition);
         for(ChessMove currentMove : potentialMoves) {
             if(validBoard(piece, currentMove)){
@@ -158,17 +161,23 @@ public class ChessGame {
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
         var validMoves = validMoves(move.getStartPosition());
-        if(isInValidMove(move, validMoves)){
-            var board = this.getBoard();
-            var piece = board.getPiece(move.getStartPosition());
-            board.addPiece(move.getStartPosition(),null);
+        var board = this.getBoard();
+        var piece = board.getPiece(move.getStartPosition());
+
+        if(validMoves != null
+                && isInValidMove(move, validMoves)
+                && piece.getTeamColor() == getTeamTurn()) {
+            board.addPiece(move.getStartPosition(), null);
             board.addPiece(move.getEndPosition(), piece);
         } else{
             throw new InvalidMoveException();
         }
-
     }
     private boolean isInValidMove(ChessMove move, Collection<ChessMove> validMoves) {
+        if (move == null || validMoves == null) {
+            return false;
+        }
+
         for(ChessMove currentMove: validMoves){
             if(movesAreEqual(move, currentMove) ){
                 return true;
