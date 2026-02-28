@@ -163,15 +163,30 @@ public class ChessGame {
         var validMoves = validMoves(move.getStartPosition());
         var board = this.getBoard();
         var piece = board.getPiece(move.getStartPosition());
-
+        
         if(validMoves != null
                 && isInValidMove(move, validMoves)
                 && piece.getTeamColor() == getTeamTurn()) {
             board.addPiece(move.getStartPosition(), null);
-            board.addPiece(move.getEndPosition(), piece);
+            ChessPiece newPiece = piece;
+            if(move.getPromotionPiece() != null){
+                newPiece = new ChessPiece(piece.getTeamColor(), move.getPromotionPiece());
+            }
+            board.addPiece(move.getEndPosition(), newPiece);
+            var otherTeamColor = getOtherTeamColor(piece.getTeamColor());
+            
+            this.setTeamTurn(otherTeamColor);
         } else{
             throw new InvalidMoveException();
         }
+    }
+    
+    private TeamColor getOtherTeamColor(TeamColor myTeamColor){
+        if(myTeamColor == TeamColor.WHITE){
+            return TeamColor.BLACK;
+        }
+        return TeamColor.WHITE;
+
     }
     private boolean isInValidMove(ChessMove move, Collection<ChessMove> validMoves) {
         if (move == null || validMoves == null) {
@@ -190,7 +205,8 @@ public class ChessGame {
         if(move1.getStartPosition().getRow() == move2.getStartPosition().getRow() &&
                 move1.getStartPosition().getColumn() == move2.getStartPosition().getColumn() &&
                 move1.getEndPosition().getRow() == move2.getEndPosition().getRow() &&
-                move1.getEndPosition().getColumn() == move2.getEndPosition().getColumn()){
+                move1.getEndPosition().getColumn() == move2.getEndPosition().getColumn() &&
+                move1.getPromotionPiece() == move2.getPromotionPiece()){
             return true;
         }
 
