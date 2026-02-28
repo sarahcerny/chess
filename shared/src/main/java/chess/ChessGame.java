@@ -82,7 +82,7 @@ public class ChessGame {
     }
 
     private boolean validBoard(ChessPiece piece, ChessMove move) {
-        boolean valid = false;
+        boolean valid = true;
         var potentialBoard = cloneBoard(this.getBoard());
         potentialBoard.addPiece(move.getStartPosition(),null);
         potentialBoard.addPiece(move.getEndPosition(), clonePiece(piece));
@@ -94,12 +94,18 @@ public class ChessGame {
                 ChessPiece potentialPiece = potentialBoard.getPiece(position);
                 if (potentialPiece != null) {
                     if(potentialPiece.getTeamColor() != piece.getTeamColor()){
-
+                        var potentialPosition = new ChessPosition(i,j);
+                        var potentialPieceMoves = potentialPiece.pieceMoves(potentialBoard, potentialPosition);
+                        for(ChessMove currentMove : potentialPieceMoves) {
+                            if(currentMove.getEndPosition().getRow() == kingPosition.getRow()
+                                    && currentMove.getEndPosition().getColumn() == kingPosition.getColumn()){
+                                valid = false;
+                            }
+                        }
                     }
                 }
             }
         }
-
 
         return valid;
     }
