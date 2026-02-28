@@ -185,11 +185,11 @@ public class ChessGame {
     }
     private boolean movesAreEqual(ChessMove move1, ChessMove move2){
 
-        if(move1.getStartPosition().getRow() == move2.getStartPosition().getRow() &&
+        if (move1.getStartPosition().getRow() == move2.getStartPosition().getRow() &&
                 move1.getStartPosition().getColumn() == move2.getStartPosition().getColumn() &&
                 move1.getEndPosition().getRow() == move2.getEndPosition().getRow() &&
                 move1.getEndPosition().getColumn() == move2.getEndPosition().getColumn() &&
-                move1.getPromotionPiece() == move2.getPromotionPiece()){
+                move1.getPromotionPiece() == move2.getPromotionPiece()) {
             return true;
         }
 
@@ -215,7 +215,7 @@ public class ChessGame {
                 var position = new ChessPosition(i, j);
                 ChessPiece potentialPiece = board.getPiece(position);
                 if (potentialPiece != null) {
-                    if(potentialPiece.getTeamColor() != teamColor){
+                    if (potentialPiece.getTeamColor() != teamColor) {
                         var potentialPosition = new ChessPosition(i,j);
                         var potentialPieceMoves = potentialPiece.pieceMoves(board, potentialPosition);
                         for(ChessMove currentMove : potentialPieceMoves) {
@@ -238,7 +238,24 @@ public class ChessGame {
          * @return True if the specified team is in checkmate
          */
     public boolean isInCheckmate(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+        if (!isInCheck(teamColor)) {
+            return false;
+        }
+        var board = this.getBoard();
+        for(int i = 1; i <=8; i++ ){
+            for(int j = 1; j <=8; j++ ) {
+                var position = new ChessPosition(i, j);
+                ChessPiece piece = board.getPiece(position);
+                if (piece != null && piece.getTeamColor() == teamColor) {
+                    var validMoves = this.validMoves(position);
+                    if(validMoves == null || !validMoves.isEmpty() ){
+                        return false;
+                    }
+                }
+            }
+        }
+
+        return true;
     }
 
     /**
