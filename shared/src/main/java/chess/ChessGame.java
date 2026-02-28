@@ -88,7 +88,17 @@ public class ChessGame {
         potentialBoard.addPiece(move.getEndPosition(), clonePiece(piece));
 
         var kingPosition = findKingPosition(potentialBoard, piece.getTeamColor());
+        for(int i = 1; i <=8; i++ ){
+            for(int j = 1; j <=8; j++ ) {
+                var position = new ChessPosition(i, j);
+                ChessPiece potentialPiece = potentialBoard.getPiece(position);
+                if (potentialPiece != null) {
+                    if(potentialPiece.getTeamColor() != piece.getTeamColor()){
 
+                    }
+                }
+            }
+        }
 
 
         return valid;
