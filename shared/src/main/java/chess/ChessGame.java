@@ -266,8 +266,24 @@ public class ChessGame {
      * @return True if the specified team is in stalemate, otherwise false
      */
     public boolean isInStalemate(TeamColor teamColor) {
+        if (isInCheck(teamColor)) {
+            return false;
+        }
+        var board = this.getBoard();
+        for(int i = 1; i <=8; i++ ){
+            for(int j = 1; j <=8; j++ ) {
+                var position = new ChessPosition(i, j);
+                ChessPiece piece = board.getPiece(position);
+                if (piece != null && piece.getTeamColor() == teamColor) {
+                    var validMoves = this.validMoves(position);
+                    if(validMoves == null || !validMoves.isEmpty() ){
+                        return false;
+                    }
+                }
+            }
+        }
 
-        throw new RuntimeException("Not implemented");
+        return true;
     }
 
     /**
