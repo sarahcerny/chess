@@ -87,32 +87,15 @@ public class ChessGame {
     }
 
     private boolean validBoard(ChessPiece piece, ChessMove move) {
-        boolean valid = true;
         var potentialBoard = cloneBoard(this.getBoard());
         potentialBoard.addPiece(move.getStartPosition(),null);
         potentialBoard.addPiece(move.getEndPosition(), clonePiece(piece));
 
-        var kingPosition = findKingPosition(potentialBoard, piece.getTeamColor());
-        for(int i = 1; i <=8; i++ ){
-            for(int j = 1; j <=8; j++ ) {
-                var position = new ChessPosition(i, j);
-                ChessPiece potentialPiece = potentialBoard.getPiece(position);
-                if (potentialPiece != null) {
-                    if(potentialPiece.getTeamColor() != piece.getTeamColor()){
-                        var potentialPosition = new ChessPosition(i,j);
-                        var potentialPieceMoves = potentialPiece.pieceMoves(potentialBoard, potentialPosition);
-                        for(ChessMove currentMove : potentialPieceMoves) {
-                            if(currentMove.getEndPosition().getRow() == kingPosition.getRow()
-                                    && currentMove.getEndPosition().getColumn() == kingPosition.getColumn()){
-                                valid = false;
-                            }
-                        }
-                    }
-                }
-            }
+        var isInCheck = this.isBoardInCheck(potentialBoard, piece.getTeamColor());
+        if (isInCheck) {
+            return false;
         }
-
-        return valid;
+        return true;
     }
 
     private ChessPosition findKingPosition(ChessBoard board, TeamColor color){
@@ -220,7 +203,32 @@ public class ChessGame {
      * @return True if the specified team is in check
      */
     public boolean isInCheck(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+        var board = this.getBoard();
+
+        return isBoardInCheck(board, teamColor);
+    }
+
+    private boolean isBoardInCheck(ChessBoard board, TeamColor teamColor){
+        var kingPosition = findKingPosition(board, teamColor);
+        for(int i = 1; i <=8; i++ ){
+            for(int j = 1; j <=8; j++ ) {
+                var position = new ChessPosition(i, j);
+                ChessPiece potentialPiece = board.getPiece(position);
+                if (potentialPiece != null) {
+                    if(potentialPiece.getTeamColor() != teamColor){
+                        var potentialPosition = new ChessPosition(i,j);
+                        var potentialPieceMoves = potentialPiece.pieceMoves(board, potentialPosition);
+                        for(ChessMove currentMove : potentialPieceMoves) {
+                            if(currentMove.getEndPosition().getRow() == kingPosition.getRow()
+                                    && currentMove.getEndPosition().getColumn() == kingPosition.getColumn()){
+                                return true;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return false;
     }
 
     /**
