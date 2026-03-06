@@ -23,4 +23,23 @@ public class ServiceTests {
         gameService = new GameService(dataAccess);
         gameService.clear();
     }
+    // Register
+    @Test
+    public void registerSuccess() throws DataAccessException {
+        AuthData auth = userService.register("sarah", "password", "sarah@email.com");
+        assertNotNull(auth.authToken());
+        assertEquals("sarah", auth.username());
+    }
+
+    @Test
+    public void registerDuplicateFails() throws DataAccessException {
+        userService.register("sarah", "password", "sarah@email.com");
+        assertThrows(DataAccessException.class, () ->
+                userService.register("sarah", "password", "sarah@email.com"));
+    }
+
+
+
+
+
 }
