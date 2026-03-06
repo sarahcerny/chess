@@ -1,0 +1,6 @@
+<component name="ArtifactManager">
+  <artifact name="Chess 0 attempt to zip">
+    <output-path>$PROJECT_DIR$/out/artifacts/Chess_0_attempt_to_zip</output-path>
+    <root id="root" />
+  </artifact>
+</component>
