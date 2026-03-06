@@ -38,6 +38,20 @@ public class ServiceTests {
                 userService.register("sarah", "password", "sarah@email.com"));
     }
 
+    // Log in
+    @Test
+    public void loginSuccess() throws DataAccessException {
+        userService.register("sarah", "password", "sarah@email.com");
+        AuthData auth = userService.login("sarah", "password");
+        assertNotNull(auth.authToken());
+    }
+
+    @Test
+    public void loginWrongPasswordFails() throws DataAccessException {
+        userService.register("sarah", "password", "sarah@email.com");
+        assertThrows(DataAccessException.class, () ->
+                userService.login("sarah", "wrongpassword"));
+    }
 
 
 
