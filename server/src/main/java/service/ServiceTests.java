@@ -99,7 +99,23 @@ public class ServiceTests {
         assertThrows(DataAccessException.class, () ->
                 gameService.createGame("badtoken", "mygame"));
     }
+    // Yaya you joined the game
+    @Test
+    public void joinGameSuccess() throws DataAccessException {
+        AuthData auth = userService.register("sarah", "password", "sarah@email.com");
+        int id = gameService.createGame(auth.authToken(), "mygame");
+        assertDoesNotThrow(() -> gameService.joinGame(auth.authToken(), "WHITE", id));
+    }
 
+    @Test
+    public void joinGameAlreadyTakenFails() throws DataAccessException {
+        AuthData auth1 = userService.register("sarah", "password", "sarah@email.com");
+        AuthData auth2 = userService.register("bob", "password", "bob@email.com");
+        int id = gameService.createGame(auth1.authToken(), "mygame");
+        gameService.joinGame(auth1.authToken(), "WHITE", id);
+        assertThrows(DataAccessException.class, () ->
+                gameService.joinGame(auth2.authToken(), "WHITE", id));
+    }
 
 
 }
