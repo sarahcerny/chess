@@ -27,6 +27,9 @@ public class UserService {
     }
 
     public AuthData login(String username, String password) throws DataAccessException {
+        if (username == null || password == null) {
+            throw new DataAccessException("Error: bad request");
+        }
         UserData user = dataAccess.getUser(username);
         if (user == null || !user.password().equals(password)) {
             throw new DataAccessException("Error: unauthorized");
