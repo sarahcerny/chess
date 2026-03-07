@@ -1,5 +1,6 @@
 package server;
 
+import io.javalin.json.JsonMapper;
 import com.google.gson.Gson;
 import dataaccess.DataAccess;
 import dataaccess.DataAccessException;
@@ -24,9 +25,20 @@ public class Server {
         userService = new UserService(dataAccess);
         gameService = new GameService(dataAccess);
 
-        javalin = Javalin.create(config -> config.staticFiles.add("web"));
-
-        // Register your endpoints and exception handlers here.
+        javalin = Javalin.create(config -> {
+            config.staticFiles.add("web");
+            Gson mapperGson = new Gson();
+            config.jsonMapper(new JsonMapper() {
+                @Override
+                public String toJsonString(Object obj, java.lang.reflect.Type type) {
+                    return mapperGson.toJson(obj, type);
+                }
+                @Override
+                public <T> T fromJsonString(String json, java.lang.reflect.Type targetType) {
+                    return mapperGson.fromJson(json, targetType);
+                }
+            });
+        });
         javalin.delete("/db", this::clear);
         javalin.post("/user", this::register);
         javalin.post("/session", this::login);
@@ -116,4 +128,6 @@ public class Server {
     private void handleException(Exception e, Context ctx) {
         ctx.status(500).json(Map.of("message", "Error: " + e.getMessage()));
     }
+
+
 }
