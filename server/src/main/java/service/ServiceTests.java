@@ -52,6 +52,18 @@ public class ServiceTests {
         assertThrows(DataAccessException.class, () ->
                 userService.login("sarah", "wrongpassword"));
     }
+    // Logging out
+    @Test
+    public void logoutSuccess() throws DataAccessException {
+        AuthData auth = userService.register("sarah", "password", "sarah@email.com");
+        assertDoesNotThrow(() -> userService.logout(auth.authToken()));
+    }
+
+    @Test
+    public void logoutInvalidTokenFails() {
+        assertThrows(DataAccessException.class, () ->
+                userService.logout("faketoken"));
+    }
 
 
 
