@@ -64,7 +64,41 @@ public class ServiceTests {
         assertThrows(DataAccessException.class, () ->
                 userService.logout("faketoken"));
     }
+    // clear data out
+    @Test
+    public void clearSuccess() throws DataAccessException {
+        userService.register("sarah", "password", "sarah@email.com");
+        gameService.clear();
+        assertThrows(DataAccessException.class, () ->
+                userService.login("sarah", "password"));
+    }
+    // list game ideas
+    @Test
+    public void listGamesSuccess() throws DataAccessException {
+        AuthData auth = userService.register("sarah", "password", "sarah@email.com");
+        gameService.createGame(auth.authToken(), "testgame");
+        List<GameData> games = gameService.listGames(auth.authToken());
+        assertEquals(1, games.size());
+    }
 
+    @Test
+    public void listGamesUnauthorizedFails() {
+        assertThrows(DataAccessException.class, () ->
+                gameService.listGames("badtoken"));
+    }
+    // creating the board game
+    @Test
+    public void createGameSuccess() throws DataAccessException {
+        AuthData auth = userService.register("sarah", "password", "sarah@email.com");
+        int id = gameService.createGame(auth.authToken(), "mygame");
+        assertTrue(id > 0);
+    }
+
+    @Test
+    public void createGameUnauthorizedFails() {
+        assertThrows(DataAccessException.class, () ->
+                gameService.createGame("badtoken", "mygame"));
+    }
 
 
 
