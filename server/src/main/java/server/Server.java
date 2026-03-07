@@ -106,7 +106,11 @@ public class Server {
         String authToken = ctx.header("authorization");
         var body = gson.fromJson(ctx.body(), Map.class);
         String playerColor = (String) body.get("playerColor");
-        int gameID = ((Double) body.get("gameID")).intValue();
+        Object gameIDObj = body.get("gameID");
+        if (gameIDObj == null) {
+            throw new DataAccessException("Error: bad request");
+        }
+        int gameID = ((Double) gameIDObj).intValue();
         gameService.joinGame(authToken, playerColor, gameID);
         ctx.status(200).json(Map.of());
     }
