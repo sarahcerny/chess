@@ -1,0 +1,37 @@
+okay from another repo from 2024 this is what they did
+
+server/src/main/java/dataAccess/DataAccessException.java
+package dataAccess;
+
+/**
+ * Indicates there was an error connecting to the database
+ */
+public class DataAccessException extends Exception{
+    public DataAccessException(String message) {
+        super(message);
+    }
+}
+
+//server/src/main/java/server/Server.java
+package server;
+
+import spark.*;
+
+public class Server {
+
+    public int run(int desiredPort) {
+        Spark.port(desiredPort);
+
+        Spark.staticFiles.location("web");
+
+        // Register your endpoints and handle exceptions here.
+
+        Spark.awaitInitialization();
+        return Spark.port();
+    }
+
+    public void stop() {
+        Spark.stop();
+        Spark.awaitStop();
+    }
+}
