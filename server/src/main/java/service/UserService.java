@@ -14,36 +14,36 @@ public class UserService {
         this.dataAccess = dataAccess;
     }
 
-    public AuthData register(String username, String password, String email) throws DataAccessException {
-        if (username == null || password == null || email == null) {
+    public AuthData register(String playerName, String password, String playerEmail) throws DataAccessException {
+        if (playerName == null || password == null || playerEmail == null) {
             throw new DataAccessException("Error: bad request");
         }
-        if (dataAccess.getUser(username) != null) {
+        if (dataAccess.getUser(playerName) != null) {
             throw new DataAccessException("Error: already taken");
         }
-        dataAccess.createUser(new UserData(username, password, email));
-        AuthData auth = new AuthData(UUID.randomUUID().toString(), username);
-        dataAccess.createAuth(auth);
-        return auth;
+        dataAccess.createUser(new UserData(playerName, password, playerEmail));
+        AuthData playerSession = new AuthData(UUID.randomUUID().toString(), playerName);
+        dataAccess.createAuth(playerSession);
+        return playerSession;
     }
 
-    public AuthData login(String username, String password) throws DataAccessException {
-        if (username == null || password == null) {
+    public AuthData login(String playerName, String password) throws DataAccessException {
+        if (playerName == null || password == null) {
             throw new DataAccessException("Error: bad request");
         }
-        UserData user = dataAccess.getUser(username);
-        if (user == null || !user.password().equals(password)) {
+        UserData playerData = dataAccess.getUser(playerName);
+        if (playerData == null || !playerData.password().equals(password)) {
             throw new DataAccessException("Error: unauthorized");
         }
-        AuthData auth = new AuthData(UUID.randomUUID().toString(), username);
-        dataAccess.createAuth(auth);
-        return auth;
+        AuthData playerSession = new AuthData(UUID.randomUUID().toString(), playerName);
+        dataAccess.createAuth(playerSession);
+        return playerSession;
     }
 
-    public void logout(String authToken) throws DataAccessException {
-        if (dataAccess.getAuth(authToken) == null) {
+    public void logout(String playerToken) throws DataAccessException {
+        if (dataAccess.getAuth(playerToken) == null) {
             throw new DataAccessException("Error: unauthorized");
         }
-        dataAccess.deleteAuth(authToken);
+        dataAccess.deleteAuth(playerToken);
     }
 }
