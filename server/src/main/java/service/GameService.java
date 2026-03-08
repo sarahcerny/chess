@@ -19,43 +19,43 @@ public class GameService {
         dataAccess.clear();
     }
 
-    public List<GameData> listGames(String authToken) throws DataAccessException {
-        if (dataAccess.getAuth(authToken) == null) {
+    public List<GameData> listGames(String playerToken) throws DataAccessException {
+        if (dataAccess.getAuth(playerToken) == null) {
             throw new DataAccessException("Error: unauthorized");
         }
         return dataAccess.listGames();
     }
 
-    public int createGame(String authToken, String gameName) throws DataAccessException {
-        if (dataAccess.getAuth(authToken) == null) {
+    public int createGame(String playerToken, String gameTitle) throws DataAccessException {
+        if (dataAccess.getAuth(playerToken) == null) {
             throw new DataAccessException("Error: unauthorized");
         }
-        if (gameName == null) {
+        if (gameTitle == null) {
             throw new DataAccessException("Error: bad request");
         }
-        GameData game = new GameData(0, null, null, gameName, new ChessGame());
-        return dataAccess.createGame(game);
+        GameData newGameBoard = new GameData(0, null, null, gameTitle, new ChessGame());
+        return dataAccess.createGame(newGameBoard);
     }
 
-    public void joinGame(String authToken, String playerColor, int gameID) throws DataAccessException {
-        AuthData auth = dataAccess.getAuth(authToken);
-        if (auth == null) {
+    public void joinGame(String playerToken, String teamColor, int chessGameID) throws DataAccessException {
+        AuthData playerSession = dataAccess.getAuth(playerToken);
+        if (playerSession == null) {
             throw new DataAccessException("Error: unauthorized");
         }
-        GameData game = dataAccess.getGame(gameID);
-        if (game == null || playerColor == null) {
+        GameData currentGame = dataAccess.getGame(chessGameID);
+        if (currentGame == null || teamColor == null) {
             throw new DataAccessException("Error: bad request");
         }
-        if (playerColor.equals("WHITE")) {
-            if (game.whiteUsername() != null) {
+        if (teamColor.equals("WHITE")) {
+            if (currentGame.whiteUsername() != null) {
                 throw new DataAccessException("Error: already taken");
             }
-            dataAccess.updateGame(new GameData(game.gameID(), auth.username(), game.blackUsername(), game.gameName(), game.game()));
-        } else if (playerColor.equals("BLACK")) {
-            if (game.blackUsername() != null) {
+            dataAccess.updateGame(new GameData(currentGame.gameID(), playerSession.username(), currentGame.blackUsername(), currentGame.gameName(), currentGame.game()));
+        } else if (teamColor.equals("BLACK")) {
+            if (currentGame.blackUsername() != null) {
                 throw new DataAccessException("Error: already taken");
             }
-            dataAccess.updateGame(new GameData(game.gameID(), game.whiteUsername(), auth.username(), game.gameName(), game.game()));
+            dataAccess.updateGame(new GameData(currentGame.gameID(), currentGame.whiteUsername(), playerSession.username(), currentGame.gameName(), currentGame.game()));
         } else {
             throw new DataAccessException("Error: bad request");
         }
