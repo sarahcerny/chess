@@ -10,7 +10,7 @@ import java.util.Map;
 
 
 // stores everything in memory for now
-public class MemoryDataAccess implements DataAccess {
+public class MemoryDataAccess implements UserDAO, AuthDAO, GameDAO {
 
     // all the real players who have signed up
     private final Map<String, UserData> realPlayers = new HashMap<>();
