@@ -11,6 +11,7 @@ import java.util.List;
 
 public class MySqlDataAccess implements DataAccess {
 
+    private final Gson gson = new Gson();
     public MySqlDataAccess() throws DataAccessException {
         configureDatabase();
     }
@@ -95,7 +96,22 @@ public class MySqlDataAccess implements DataAccess {
     }
 
     public int createGame(GameData game) throws DataAccessException {
-        throw new DataAccessException("Not implemented yet");
+        try (var conn = DatabaseManager.getConnection()) {
+            try (var ps = conn.prepareStatement(
+                    "INSERT INTO games (whiteUsername, blackUsername, gameName, game) VALUES (?, ?, ?, ?)",
+                    Statement.RETURN_GENERATED_KEYS)) {
+                ps.setString(1, game.whiteUsername());
+                ps.setString(2, game.blackUsername());
+                ps.setString(3, game.gameName());
+                ps.setString(4, gson.toJson(game.game()));
+                ps.executeUpdate();
+                var rs = ps.getGeneratedKeys();
+                if (rs.next()) { return rs.getInt(1); }
+            }
+        } catch (SQLException e) {
+            throw new DataAccessException("Unable to create game", e);
+        }
+        return 0;
     }
     public GameData getGame(int gameID) throws DataAccessException {
         throw new DataAccessException("Not implemented yet");
