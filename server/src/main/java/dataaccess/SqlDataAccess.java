@@ -9,13 +9,12 @@ import chess.ChessGame;
 import java.util.ArrayList;
 
 import java.sql.*;
-import java.util.ArrayList;
 import java.util.List;
 
-public class MySqlDataAccess implements DataAccess {
+public class SqlDataAccess implements DataAccess {
 
     private final Gson gson = new Gson();
-    public MySqlDataAccess() throws DataAccessException {
+    public SqlDataAccess() throws DataAccessException {
         configureDatabase();
     }
 
