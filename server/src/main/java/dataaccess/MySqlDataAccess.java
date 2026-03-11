@@ -5,8 +5,11 @@ import model.GameData;
 import model.UserData;
 import com.google.gson.Gson;
 import org.mindrot.jbcrypt.BCrypt;
+import chess.ChessGame;
+import java.util.ArrayList;
 
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.List;
 
 public class MySqlDataAccess implements DataAccess {
@@ -126,10 +129,31 @@ public class MySqlDataAccess implements DataAccess {
         return null;
     }
     public List<GameData> listGames() throws DataAccessException {
-        throw new DataAccessException("Not implemented yet");
+        var games = new ArrayList<GameData>();
+        try (var conn = DatabaseManager.getConnection()) {
+            try (var ps = conn.prepareStatement("SELECT * FROM games")) {
+                var rs = ps.executeQuery();
+                while (rs.next()) { games.add(readGame(rs)); }
+            }
+        } catch (SQLException e) {
+            throw new DataAccessException("Unable to list games", e);
+        }
+        return games;
     }
     public void updateGame(GameData game) throws DataAccessException {
-        throw new DataAccessException("Not implemented yet");
+        try (var conn = DatabaseManager.getConnection()) {
+            try (var ps = conn.prepareStatement(
+                    "UPDATE games SET whiteUsername=?, blackUsername=?, gameName=?, game=? WHERE gameID=?")) {
+                ps.setString(1, game.whiteUsername());
+                ps.setString(2, game.blackUsername());
+                ps.setString(3, game.gameName());
+                ps.setString(4, gson.toJson(game.game()));
+                ps.setInt(5, game.gameID());
+                ps.executeUpdate();
+            }
+        } catch (SQLException e) {
+            throw new DataAccessException("Unable to update game", e);
+        }
     }
     public void createAuth(AuthData auth) throws DataAccessException {
         try (var conn = DatabaseManager.getConnection()) {
