@@ -19,8 +19,8 @@ public class ServiceTests {
     @BeforeEach
     public void setup() throws DataAccessException {
         var dataAccess = new MemoryDataAccess();
-        userService = new UserService(dataAccess);
-        gameService = new GameService(dataAccess);
+        userService = new UserService(dataAccess, dataAccess);
+        gameService = new GameService(dataAccess, dataAccess, dataAccess);
         gameService.clear();
     }
 
