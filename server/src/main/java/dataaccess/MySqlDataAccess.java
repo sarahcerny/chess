@@ -117,7 +117,18 @@ public class MySqlDataAccess implements DataAccess {
         }
     }
     public AuthData getAuth(String authToken) throws DataAccessException {
-        throw new DataAccessException("Not implemented yet");
+        try (var conn = DatabaseManager.getConnection()) {
+            try (var ps = conn.prepareStatement("SELECT * FROM auth WHERE authToken=?")) {
+                ps.setString(1, authToken);
+                var rs = ps.executeQuery();
+                if (rs.next()) {
+                    return new AuthData(rs.getString("authToken"), rs.getString("username"));
+                }
+            }
+        } catch (SQLException e) {
+            throw new DataAccessException("Unable to get auth", e);
+        }
+        return null;
     }
     public void deleteAuth(String authToken) throws DataAccessException {
         throw new DataAccessException("Not implemented yet");
