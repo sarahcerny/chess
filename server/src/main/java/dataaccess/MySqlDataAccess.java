@@ -3,6 +3,7 @@ package dataaccess;
 import model.AuthData;
 import model.GameData;
 import model.UserData;
+import com.google.gson.Gson;
 import org.mindrot.jbcrypt.BCrypt;
 
 import java.sql.*;
@@ -131,6 +132,13 @@ public class MySqlDataAccess implements DataAccess {
         return null;
     }
     public void deleteAuth(String authToken) throws DataAccessException {
-        throw new DataAccessException("Not implemented yet");
+        try (var conn = DatabaseManager.getConnection()) {
+            try (var ps = conn.prepareStatement("DELETE FROM auth WHERE authToken=?")) {
+                ps.setString(1, authToken);
+                ps.executeUpdate();
+            }
+        } catch (SQLException e) {
+            throw new DataAccessException("Unable to delete auth", e);
+        }
     }
 }
