@@ -1,8 +1,7 @@
 package server;
 
 import com.google.gson.Gson;
-import dataaccess.MemoryDataAccess;
-import dataaccess.DataAccessException;
+import dataaccess.*;
 import io.javalin.Javalin;
 import io.javalin.http.Context;
 import io.javalin.json.JsonMapper;
@@ -22,10 +21,19 @@ public class Server {
     private final Gson gsonMap = new Gson();
 
     public Server() {
-        // one dataAccess shared across both services so they collab
-        MemoryDataAccess dataAccess = new MemoryDataAccess();
-        userService = new UserService(dataAccess, dataAccess);
-        gameService = new GameService(dataAccess, dataAccess, dataAccess);
+        SqlUserDAO userDAO;
+        SqlAuthDAO authDAO;
+        SqlGameDAO gameDAO;
+        try {
+            DatabaseManager.createDatabase();
+            userDAO = new SqlUserDAO();
+            authDAO = new SqlAuthDAO();
+            gameDAO = new SqlGameDAO();
+        } catch (DataAccessException e) {
+            throw new RuntimeException("Failed to initialize database", e);
+        }
+        userService = new UserService(userDAO, authDAO);
+        gameService = new GameService(userDAO, authDAO, gameDAO);
         // spin up javalin and plug in gson so it knows how to handle json when she comes ur way
         myServer = Javalin.create(config -> {
             config.staticFiles.add("web");
