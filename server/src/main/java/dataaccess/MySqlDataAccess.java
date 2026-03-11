@@ -114,7 +114,16 @@ public class MySqlDataAccess implements DataAccess {
         return 0;
     }
     public GameData getGame(int gameID) throws DataAccessException {
-        throw new DataAccessException("Not implemented yet");
+        try (var conn = DatabaseManager.getConnection()) {
+            try (var ps = conn.prepareStatement("SELECT * FROM games WHERE gameID=?")) {
+                ps.setInt(1, gameID);
+                var rs = ps.executeQuery();
+                if (rs.next()) { return readGame(rs); }
+            }
+        } catch (SQLException e) {
+            throw new DataAccessException("Unable to get game", e);
+        }
+        return null;
     }
     public List<GameData> listGames() throws DataAccessException {
         throw new DataAccessException("Not implemented yet");
