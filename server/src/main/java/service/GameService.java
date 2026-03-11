@@ -13,7 +13,7 @@ public class GameService {
     // dataAccess does all the heavy lifting of actually storing stuff
     private final DataAccess dataAccess;
 
-    public GameService(DataAccess dataAccess) {
+    public GameService(UserDAO userDAO, AuthDAO authDAO, GameDAO gameDAO) {
         this.dataAccess = dataAccess;
     }
 

@@ -13,7 +13,7 @@ public class UserService {
     // dataAccess is where all the actual data lives
     private final DataAccess dataAccess;
 
-    public UserService(DataAccess dataAccess) {
+    public UserService(UserDAO userDAO, AuthDAO authDAO) {
         this.dataAccess = dataAccess;
     }
 
