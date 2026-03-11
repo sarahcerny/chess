@@ -163,6 +163,9 @@ public class Server {
             ctx.status(500);
         }
 
+        if (!errorMsg.toLowerCase().contains("error")) {
+            errorMsg = "Error: " + errorMsg;
+        }
         ctx.json(Map.of("message", errorMsg));
     }
     // catch all for anything random that will break
