@@ -106,7 +106,15 @@ public class MySqlDataAccess implements DataAccess {
         throw new DataAccessException("Not implemented yet");
     }
     public void createAuth(AuthData auth) throws DataAccessException {
-        throw new DataAccessException("Not implemented yet");
+        try (var conn = DatabaseManager.getConnection()) {
+            try (var ps = conn.prepareStatement("INSERT INTO auth (authToken, username) VALUES (?, ?)")) {
+                ps.setString(1, auth.authToken());
+                ps.setString(2, auth.username());
+                ps.executeUpdate();
+            }
+        } catch (SQLException e) {
+            throw new DataAccessException("Unable to create auth", e);
+        }
     }
     public AuthData getAuth(String authToken) throws DataAccessException {
         throw new DataAccessException("Not implemented yet");
