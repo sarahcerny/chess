@@ -16,7 +16,7 @@ import javax.xml.crypto.Data;
 import static org.junit.jupiter.api.Assertions.*;
 
 
-public class DAOTests {
+public class DataAccessTests {
 
     private SqlUserDAO userDAO;
     private SqlAuthDAO authDAO;
@@ -31,6 +31,20 @@ public class DAOTests {
         userDAO.clear();
         authDAO.clear();
         gameDAO.clear();
+    }
+    // clear goes crazy and deletes everyone bye felicia
+    @Test
+    public void clearUserInput() throws DataAccessException {
+        userDAO.createUser(new UserData("weston", "password", "weston@chess.com"));
+        userDAO.clear();
+        assertNull(userDAO.getUser("weston"));
+    }
+
+    // brand new player gets added to the roster slay
+    @Test
+    public void newPlayerAdded() throws DataAccessException {
+        userDAO.createUser(new UserData("weston", "password", "weston@chess.com"));
+        assertNotNull(userDAO.getUser("weston"));
     }
 
 
