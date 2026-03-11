@@ -3,6 +3,8 @@ package dataaccess;
 import model.AuthData;
 import model.GameData;
 import model.UserData;
+import org.mindrot.jbcrypt.BCrypt;
+
 import java.sql.*;
 import java.util.List;
 
@@ -65,7 +67,16 @@ public class MySqlDataAccess implements DataAccess {
     }
 
     public void createUser(UserData user) throws DataAccessException {
-        throw new DataAccessException("Not implemented yet");
+        try (var conn = DatabaseManager.getConnection()) {
+            try (var ps = conn.prepareStatement("INSERT INTO users (username, password, email) VALUES (?, ?, ?)")) {
+                ps.setString(1, user.username());
+                ps.setString(2, BCrypt.hashpw(user.password(), BCrypt.gensalt()));
+                ps.setString(3, user.email());
+                ps.executeUpdate();
+            }
+        } catch (SQLException e) {
+            throw new DataAccessException("Unable to create user", e);
+        }
     }
     public UserData getUser(String username) throws DataAccessException {
         throw new DataAccessException("Not implemented yet");
