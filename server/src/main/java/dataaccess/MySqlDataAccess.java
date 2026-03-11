@@ -190,4 +190,13 @@ public class MySqlDataAccess implements DataAccess {
             throw new DataAccessException("Unable to delete auth", e);
         }
     }
+    private GameData readGame(ResultSet rs) throws SQLException {
+        return new GameData(
+                rs.getInt("gameID"),
+                rs.getString("whiteUsername"),
+                rs.getString("blackUsername"),
+                rs.getString("gameName"),
+                gson.fromJson(rs.getString("game"), ChessGame.class)
+        );
+    }
 }
