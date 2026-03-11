@@ -79,7 +79,18 @@ public class MySqlDataAccess implements DataAccess {
         }
     }
     public UserData getUser(String username) throws DataAccessException {
-        throw new DataAccessException("Not implemented yet");
+        try (var conn = DatabaseManager.getConnection()) {
+            try (var ps = conn.prepareStatement("SELECT username, password, email FROM users WHERE username=?")) {
+                ps.setString(1, username);
+                var rs = ps.executeQuery();
+                if (rs.next()) {
+                    return new UserData(rs.getString("username"), rs.getString("password"), rs.getString("email"));
+                }
+            }
+        } catch (SQLException e) {
+            throw new DataAccessException("Unable to get user", e);
+        }
+        return null;
     }
     public int createGame(GameData game) throws DataAccessException {
         throw new DataAccessException("Not implemented yet");
