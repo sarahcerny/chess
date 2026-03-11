@@ -44,7 +44,7 @@ public class UserService {
         // look them up in the system aka stalk
         UserData playerData = userDAO.getUser(playerName);
         // either they dont exist or wrong password
-        if (playerData == null || !playerData.password().equals(password)) {
+        if (playerData == null || !org.mindrot.jbcrypt.BCrypt.checkpw(password, playerData.password())) {
             throw new DataAccessException("Error: unauthorized");
         }
         // yay they passed
