@@ -46,6 +46,27 @@ public class DataAccessTests {
         userDAO.createUser(new UserData("weston", "password", "weston@chess.com"));
         assertNotNull(userDAO.getUser("weston"));
     }
+    // no identity fraud allowed same username twice not on my watch king
+    @Test
+    public void twinUsernameFails() throws DataAccessException {
+        userDAO.createUser(new UserData("weston", "password", "weston@chess.com"));
+        assertThrows(DataAccessException.class, () ->
+                userDAO.createUser(new UserData("weston", "password", "sarah@chess.com")));
+    }
+
+    // look up a real player and they show up period
+    @Test
+    public void findUserPass() throws DataAccessException {
+        userDAO.createUser(new UserData("weston", "password", "weston@chess.com"));
+        UserData found = userDAO.getUser("weston");
+        assertEquals("weston", found.username());
+        assertEquals("weston@chess.com", found.email());
+    }
+    // tempplayer doesnt exist returns null
+    @Test
+    public void isnaUserTurnsNull() throws DataAccessException {
+        assertNull(userDAO.getUser("tempplayer"));
+    }
 
 
 }
