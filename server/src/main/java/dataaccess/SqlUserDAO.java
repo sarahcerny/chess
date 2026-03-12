@@ -16,11 +16,24 @@ public class SqlUserDAO implements UserDAO {
         try (var conn = DatabaseManager.getConnection()) {
             String[] statements = {
                     // users table stores everyone who signed up slay
-                    "CREATE TABLE IF NOT EXISTS users (username VARCHAR(256) NOT NULL, password VARCHAR(256) NOT NULL, email VARCHAR(256) NOT NULL, PRIMARY KEY (username))",
+                    "CREATE TABLE IF NOT EXISTS users (" +
+                            "username VARCHAR(256) NOT NULL, " +
+                            "password VARCHAR(256) NOT NULL, " +
+                            "email VARCHAR(256) NOT NULL, " +
+                            "PRIMARY KEY (username))",
                     // auth table keeps track of who is logged in rn
-                    "CREATE TABLE IF NOT EXISTS auth (authToken VARCHAR(256) NOT NULL, username VARCHAR(256) NOT NULL, PRIMARY KEY (authToken))",
+                    "CREATE TABLE IF NOT EXISTS auth (" +
+                            "authToken VARCHAR(256) NOT NULL, " +
+                            "username VARCHAR(256) NOT NULL, " +
+                            "PRIMARY KEY (authToken))",
                     // games table every chess game that has ever existed king
-                    "CREATE TABLE IF NOT EXISTS games (gameID INT NOT NULL AUTO_INCREMENT, whiteUsername VARCHAR(256), blackUsername VARCHAR(256), gameName VARCHAR(256) NOT NULL, game TEXT NOT NULL, PRIMARY KEY (gameID))"
+                    "CREATE TABLE IF NOT EXISTS games (" +
+                            "gameID INT NOT NULL AUTO_INCREMENT, " +
+                            "whiteUsername VARCHAR(256), " +
+                            "blackUsername VARCHAR(256), " +
+                            "gameName VARCHAR(256) NOT NULL, " +
+                            "game TEXT NOT NULL, " +
+                            "PRIMARY KEY (gameID))"
             };
             // run each create statement one by one no shortcuts bestie
             for (var statement : statements) {

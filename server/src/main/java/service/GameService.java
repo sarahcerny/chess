@@ -63,19 +63,29 @@ public class GameService {
         if (currentGame == null || teamColor == null) {
             throw new DataAccessException("Error: bad request");
         }
-        //white spot taken finders keepers
+        // white spot taken finders keepers
         if (teamColor.equals("WHITE")) {
             if (currentGame.whiteUsername() != null) {
                 throw new DataAccessException("Error: already taken");
             }
-            gameDAO.updateGame(new GameData(currentGame.gameID(), playerSession.username(), currentGame.blackUsername(), currentGame.gameName(), currentGame.game()));
+            gameDAO.updateGame(new GameData(
+                    currentGame.gameID(),
+                    playerSession.username(),
+                    currentGame.blackUsername(),
+                    currentGame.gameName(),
+                    currentGame.game()));
         } else if (teamColor.equals("BLACK")) {
-            //black spot taken finders keepers
+            // black spot taken finders keepers
             if (currentGame.blackUsername() != null) {
                 throw new DataAccessException("Error: already taken");
             }
-            //locking in black lets win this
-            gameDAO.updateGame(new GameData(currentGame.gameID(), currentGame.whiteUsername(), playerSession.username(), currentGame.gameName(), currentGame.game()));
+            // locking in black lets win this
+            gameDAO.updateGame(new GameData(
+                    currentGame.gameID(),
+                    currentGame.whiteUsername(),
+                    playerSession.username(),
+                    currentGame.gameName(),
+                    currentGame.game()));
         } else {
             // teamColor has to be WHITE or BLACK mj song again
             throw new DataAccessException("Error: bad request");
