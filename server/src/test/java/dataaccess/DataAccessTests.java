@@ -67,6 +67,28 @@ public class DataAccessTests {
     public void isnaUserTurnsNull() throws DataAccessException {
         assertNull(userDAO.getUser("tempplayer"));
     }
+    // clear kills all tokens no survivors slay
+    @Test
+    public void clearTokenSuccess() throws DataAccessException {
+        authDAO.createAuth(new AuthData("supertoken", "weston"));
+        authDAO.clear();
+        assertNull(authDAO.getAuth("supertoken"));
+    }
+
+    // new token gets stored king we love to see it
+    @Test
+    public void addTokenSuccess() throws DataAccessException {
+        authDAO.createAuth(new AuthData("supertoken", "weston"));
+        assertNotNull(authDAO.getAuth("supertoken"));
+    }
+    // duplicate token is a big no allowed two keys to the same lock no way
+    @Test
+    public void twinAuthFails() throws DataAccessException {
+        authDAO.createAuth(new AuthData("supertoken", "weston"));
+        assertThrows(DataAccessException.class, () ->
+                authDAO.createAuth(new AuthData("supertoken", "sarah")));
+    }
+
 
 
 }
