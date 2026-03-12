@@ -34,7 +34,7 @@ public class ChessPiece {
         ROOK,
         PAWN
     }
-    //instead of a boolean which i once had I am going to create a enum of valid invalid and Capture because I want it to test for capture if there is a peice.
+    // using an enum instead of boolean so I can test for capture too
     public enum MoveState{
         VALID,
         INVALID,
@@ -413,6 +413,13 @@ public class ChessPiece {
         return chessMoves;
     }
 
+    private void pawnPromotion(Collection<ChessMove> chessMoves, ChessPosition myPosition, ChessPosition newPosition) {
+        chessMoves.add(new ChessMove(myPosition, newPosition, PieceType.QUEEN));
+        chessMoves.add(new ChessMove(myPosition, newPosition, PieceType.ROOK));
+        chessMoves.add(new ChessMove(myPosition, newPosition, PieceType.BISHOP));
+        chessMoves.add(new ChessMove(myPosition, newPosition, PieceType.KNIGHT));
+    }
+
     private Collection<ChessMove> pieceMovesPawn(ChessBoard board, ChessPosition myPosition, PieceType pieceType) {
         Collection<ChessMove> chessMoves = new ArrayList<ChessMove>();
 
@@ -423,10 +430,7 @@ public class ChessPiece {
             MoveState moveState = validateMove(board, this, myPosition, newPosition);
             if (moveState == MoveState.VALID) {
                 if (newPosition.getRow() == 8) {
-                    chessMoves.add(new ChessMove(myPosition, newPosition, PieceType.QUEEN));
-                    chessMoves.add(new ChessMove(myPosition, newPosition, PieceType.ROOK));
-                    chessMoves.add(new ChessMove(myPosition, newPosition, PieceType.BISHOP));
-                    chessMoves.add(new ChessMove(myPosition, newPosition, PieceType.KNIGHT));
+                    pawnPromotion(chessMoves, myPosition, newPosition);
                 } else {
                     chessMoves.add(new ChessMove(myPosition, newPosition, null));
                 }
@@ -436,10 +440,7 @@ public class ChessPiece {
                     moveState = validateMove(board, this, myPosition, newPosition);
                     if (moveState == MoveState.VALID) {
                         if (newPosition.getRow() == 8) {
-                            chessMoves.add(new ChessMove(myPosition, newPosition, PieceType.QUEEN));
-                            chessMoves.add(new ChessMove(myPosition, newPosition, PieceType.ROOK));
-                            chessMoves.add(new ChessMove(myPosition, newPosition, PieceType.BISHOP));
-                            chessMoves.add(new ChessMove(myPosition, newPosition, PieceType.KNIGHT));
+                            pawnPromotion(chessMoves, myPosition, newPosition);
                         } else {
                             chessMoves.add(new ChessMove(myPosition, newPosition, null));
                         }
@@ -452,10 +453,7 @@ public class ChessPiece {
             moveState = validateMove(board, this, myPosition, newPosition);
             if (moveState == MoveState.CAPTURE) {
                 if (newPosition.getRow() == 8) {
-                    chessMoves.add(new ChessMove(myPosition, newPosition, PieceType.QUEEN));
-                    chessMoves.add(new ChessMove(myPosition, newPosition, PieceType.ROOK));
-                    chessMoves.add(new ChessMove(myPosition, newPosition, PieceType.BISHOP));
-                    chessMoves.add(new ChessMove(myPosition, newPosition, PieceType.KNIGHT));
+                    pawnPromotion(chessMoves, myPosition, newPosition);
                 } else {
                     chessMoves.add(new ChessMove(myPosition, newPosition, null));
                 }
@@ -464,10 +462,7 @@ public class ChessPiece {
             moveState = validateMove(board, this, myPosition, newPosition);
             if (moveState == MoveState.CAPTURE) {
                 if (newPosition.getRow() == 8) {
-                    chessMoves.add(new ChessMove(myPosition, newPosition, PieceType.QUEEN));
-                    chessMoves.add(new ChessMove(myPosition, newPosition, PieceType.ROOK));
-                    chessMoves.add(new ChessMove(myPosition, newPosition, PieceType.BISHOP));
-                    chessMoves.add(new ChessMove(myPosition, newPosition, PieceType.KNIGHT));
+                    pawnPromotion(chessMoves, myPosition, newPosition);
                 } else {
                     chessMoves.add(new ChessMove(myPosition, newPosition, null));
                 }
@@ -480,10 +475,7 @@ public class ChessPiece {
             MoveState moveState = validateMove(board, this, myPosition, newPosition);
             if (moveState == MoveState.VALID) {
                 if (newPosition.getRow() == 1) {
-                    chessMoves.add(new ChessMove(myPosition, newPosition, PieceType.QUEEN));
-                    chessMoves.add(new ChessMove(myPosition, newPosition, PieceType.ROOK));
-                    chessMoves.add(new ChessMove(myPosition, newPosition, PieceType.BISHOP));
-                    chessMoves.add(new ChessMove(myPosition, newPosition, PieceType.KNIGHT));
+                    pawnPromotion(chessMoves, myPosition, newPosition);
                 } else {
                     chessMoves.add(new ChessMove(myPosition, newPosition, null));
                 }
@@ -492,10 +484,7 @@ public class ChessPiece {
                     moveState = validateMove(board, this, myPosition, newPosition);
                     if (moveState == MoveState.VALID) {
                         if (newPosition.getRow() == 1) {
-                            chessMoves.add(new ChessMove(myPosition, newPosition, PieceType.QUEEN));
-                            chessMoves.add(new ChessMove(myPosition, newPosition, PieceType.ROOK));
-                            chessMoves.add(new ChessMove(myPosition, newPosition, PieceType.BISHOP));
-                            chessMoves.add(new ChessMove(myPosition, newPosition, PieceType.KNIGHT));
+                            pawnPromotion(chessMoves, myPosition, newPosition);
                         } else {
                             chessMoves.add(new ChessMove(myPosition, newPosition, null));
                         }
@@ -506,12 +495,8 @@ public class ChessPiece {
             newPosition = new ChessPosition(myPosition.getRow() - 1, myPosition.getColumn() + 1);
             moveState = validateMove(board, this, myPosition, newPosition);
             if (moveState == MoveState.CAPTURE) {
-                PieceType promotionType = null;
                 if (newPosition.getRow() == 1) {
-                    chessMoves.add(new ChessMove(myPosition, newPosition, PieceType.QUEEN));
-                    chessMoves.add(new ChessMove(myPosition, newPosition, PieceType.ROOK));
-                    chessMoves.add(new ChessMove(myPosition, newPosition, PieceType.BISHOP));
-                    chessMoves.add(new ChessMove(myPosition, newPosition, PieceType.KNIGHT));
+                    pawnPromotion(chessMoves, myPosition, newPosition);
                 } else {
                     chessMoves.add(new ChessMove(myPosition, newPosition, null));
                 }
@@ -520,10 +505,7 @@ public class ChessPiece {
             moveState = validateMove(board, this, myPosition, newPosition);
             if (moveState == MoveState.CAPTURE) {
                 if (newPosition.getRow() == 1) {
-                    chessMoves.add(new ChessMove(myPosition, newPosition, PieceType.QUEEN));
-                    chessMoves.add(new ChessMove(myPosition, newPosition, PieceType.ROOK));
-                    chessMoves.add(new ChessMove(myPosition, newPosition, PieceType.BISHOP));
-                    chessMoves.add(new ChessMove(myPosition, newPosition, PieceType.KNIGHT));
+                    pawnPromotion(chessMoves, myPosition, newPosition);
                 } else {
                     chessMoves.add(new ChessMove(myPosition, newPosition, null));
                 }
