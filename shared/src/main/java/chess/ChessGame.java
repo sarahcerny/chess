@@ -208,24 +208,29 @@ public class ChessGame {
         return isBoardInCheck(board, teamColor);
     }
 
-    private boolean isBoardInCheck(ChessBoard board, TeamColor teamColor){
+    private boolean isBoardInCheck(ChessBoard board, TeamColor teamColor) {
         var kingPosition = findKingPosition(board, teamColor);
-        for(int i = 1; i <=8; i++ ){
-            for(int j = 1; j <=8; j++ ) {
+        for (int i = 1; i <= 8; i++) {
+            for (int j = 1; j <= 8; j++) {
                 var position = new ChessPosition(i, j);
                 ChessPiece potentialPiece = board.getPiece(position);
-                if (potentialPiece != null) {
-                    if (potentialPiece.getTeamColor() != teamColor) {
-                        var potentialPosition = new ChessPosition(i,j);
-                        var potentialPieceMoves = potentialPiece.pieceMoves(board, potentialPosition);
-                        for(ChessMove currentMove : potentialPieceMoves) {
-                            if(currentMove.getEndPosition().getRow() == kingPosition.getRow()
-                                    && currentMove.getEndPosition().getColumn() == kingPosition.getColumn()){
-                                return true;
-                            }
-                        }
+                if (potentialPiece != null && potentialPiece.getTeamColor() != teamColor) {
+                    if (pieceBadForKing(board, position, potentialPiece, kingPosition)) {
+                        return true;
                     }
                 }
+            }
+        }
+        return false;
+    }
+
+    private boolean pieceBadForKing(ChessBoard board, ChessPosition position,
+                                     ChessPiece piece, ChessPosition kingPosition) {
+        var moves = piece.pieceMoves(board, position);
+        for (ChessMove currentMove : moves) {
+            if (currentMove.getEndPosition().getRow() == kingPosition.getRow()
+                    && currentMove.getEndPosition().getColumn() == kingPosition.getColumn()) {
+                return true;
             }
         }
         return false;
