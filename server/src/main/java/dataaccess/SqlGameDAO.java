@@ -9,6 +9,7 @@ import java.util.List;
 
 public class SqlGameDAO implements GameDAO {
 
+    // gson converts our chess game object to json
     private final Gson gson = new Gson();
 
     public void clear() throws DataAccessException {
@@ -20,6 +21,8 @@ public class SqlGameDAO implements GameDAO {
         }
     }
 
+    // brand new chess game getting created
+    //the whole chess game object to json bc mysql cant store java objects bestie
     public int createGame(GameData game) throws DataAccessException {
         try (var conn = DatabaseManager.getConnection();
              var ps = conn.prepareStatement(
@@ -38,6 +41,7 @@ public class SqlGameDAO implements GameDAO {
         return 0;
     }
 
+    //its id returns null
     public GameData getGame(int gameID) throws DataAccessException {
         try (var conn = DatabaseManager.getConnection();
              var ps = conn.prepareStatement("SELECT * FROM games WHERE gameID=?")) {
@@ -50,6 +54,7 @@ public class SqlGameDAO implements GameDAO {
         return null;
     }
 
+    // dump every single game into a list
     public List<GameData> listGames() throws DataAccessException {
         var games = new ArrayList<GameData>();
         try (var conn = DatabaseManager.getConnection();
@@ -62,6 +67,8 @@ public class SqlGameDAO implements GameDAO {
         return games;
     }
 
+
+    // this is how players join and how moves get saved
     public void updateGame(GameData game) throws DataAccessException {
         try (var conn = DatabaseManager.getConnection();
              var ps = conn.prepareStatement(
@@ -76,6 +83,9 @@ public class SqlGameDAO implements GameDAO {
             throw new DataAccessException("Unable to update game", e);
         }
     }
+
+
+    //gotta read the fame academic weapon
 
     private GameData readGame(ResultSet rs) throws SQLException {
         return new GameData(
