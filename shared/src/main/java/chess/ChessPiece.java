@@ -422,97 +422,66 @@ public class ChessPiece {
 
     private Collection<ChessMove> pieceMovesPawn(ChessBoard board, ChessPosition myPosition, PieceType pieceType) {
         Collection<ChessMove> chessMoves = new ArrayList<ChessMove>();
-
         if (pieceColor == ChessGame.TeamColor.WHITE) {
-            //I am white and I can move 1 or 2 spaces vertically
-            // when white reaches row 8 it becomes a QUEEN.
-            var newPosition = new ChessPosition(myPosition.getRow() + 1, myPosition.getColumn());
-            MoveState moveState = validateMove(board, this, myPosition, newPosition);
-            if (moveState == MoveState.VALID) {
-                if (newPosition.getRow() == 8) {
-                    pawnPromotion(chessMoves, myPosition, newPosition);
-                } else {
-                    chessMoves.add(new ChessMove(myPosition, newPosition, null));
-                }
-
-                if (myPosition.getRow() == 2) {
-                    newPosition = new ChessPosition(myPosition.getRow() +2 , myPosition.getColumn());
-                    moveState = validateMove(board, this, myPosition, newPosition);
-                    if (moveState == MoveState.VALID) {
-                        if (newPosition.getRow() == 8) {
-                            pawnPromotion(chessMoves, myPosition, newPosition);
-                        } else {
-                            chessMoves.add(new ChessMove(myPosition, newPosition, null));
-                        }
-                    }
-                }
-            }
-
-            // I can also capture diagonal
-            newPosition = new ChessPosition(myPosition.getRow() + 1, myPosition.getColumn() + 1);
-            moveState = validateMove(board, this, myPosition, newPosition);
-            if (moveState == MoveState.CAPTURE) {
-                if (newPosition.getRow() == 8) {
-                    pawnPromotion(chessMoves, myPosition, newPosition);
-                } else {
-                    chessMoves.add(new ChessMove(myPosition, newPosition, null));
-                }
-            }
-            newPosition = new ChessPosition(myPosition.getRow() + 1, myPosition.getColumn() - 1);
-            moveState = validateMove(board, this, myPosition, newPosition);
-            if (moveState == MoveState.CAPTURE) {
-                if (newPosition.getRow() == 8) {
-                    pawnPromotion(chessMoves, myPosition, newPosition);
-                } else {
-                    chessMoves.add(new ChessMove(myPosition, newPosition, null));
-                }
-            }
+            whitePawnMoves(board, myPosition, chessMoves);
         }
-
         if (pieceColor == ChessGame.TeamColor.BLACK) {
-            //I am Black and I can move 1 or 2 spaces vertically
-            var newPosition = new ChessPosition(myPosition.getRow() - 1, myPosition.getColumn());
-            MoveState moveState = validateMove(board, this, myPosition, newPosition);
-            if (moveState == MoveState.VALID) {
-                if (newPosition.getRow() == 1) {
-                    pawnPromotion(chessMoves, myPosition, newPosition);
-                } else {
-                    chessMoves.add(new ChessMove(myPosition, newPosition, null));
-                }
-                if (myPosition.getRow() == 7) {
-                    newPosition = new ChessPosition(myPosition.getRow() - 2, myPosition.getColumn());
-                    moveState = validateMove(board, this, myPosition, newPosition);
-                    if (moveState == MoveState.VALID) {
-                        if (newPosition.getRow() == 1) {
-                            pawnPromotion(chessMoves, myPosition, newPosition);
-                        } else {
-                            chessMoves.add(new ChessMove(myPosition, newPosition, null));
-                        }
-                    }
-                }
-            }
-            // I can also capture diagonal
-            newPosition = new ChessPosition(myPosition.getRow() - 1, myPosition.getColumn() + 1);
-            moveState = validateMove(board, this, myPosition, newPosition);
-            if (moveState == MoveState.CAPTURE) {
-                if (newPosition.getRow() == 1) {
-                    pawnPromotion(chessMoves, myPosition, newPosition);
-                } else {
-                    chessMoves.add(new ChessMove(myPosition, newPosition, null));
-                }
-            }
-            newPosition = new ChessPosition(myPosition.getRow() - 1, myPosition.getColumn() - 1);
-            moveState = validateMove(board, this, myPosition, newPosition);
-            if (moveState == MoveState.CAPTURE) {
-                if (newPosition.getRow() == 1) {
-                    pawnPromotion(chessMoves, myPosition, newPosition);
-                } else {
-                    chessMoves.add(new ChessMove(myPosition, newPosition, null));
+            blackPawnMoves(board, myPosition, chessMoves);
+        }
+        return chessMoves;
+    }
+
+    private void whitePawnMoves(ChessBoard board, ChessPosition myPosition, Collection<ChessMove> chessMoves) {
+        var newPosition = new ChessPosition(myPosition.getRow() + 1, myPosition.getColumn());
+        MoveState moveState = validateMove(board, this, myPosition, newPosition);
+        if (moveState == MoveState.VALID) {
+            addPawnMove(chessMoves, myPosition, newPosition, 8);
+            if (myPosition.getRow() == 2) {
+                var doubleMove = new ChessPosition(myPosition.getRow() + 2, myPosition.getColumn());
+                if (validateMove(board, this, myPosition, doubleMove) == MoveState.VALID) {
+                    addPawnMove(chessMoves, myPosition, doubleMove, 8);
                 }
             }
         }
+        var diagRight = new ChessPosition(myPosition.getRow() + 1, myPosition.getColumn() + 1);
+        if (validateMove(board, this, myPosition, diagRight) == MoveState.CAPTURE) {
+            addPawnMove(chessMoves, myPosition, diagRight, 8);
+        }
+        var diagLeft = new ChessPosition(myPosition.getRow() + 1, myPosition.getColumn() - 1);
+        if (validateMove(board, this, myPosition, diagLeft) == MoveState.CAPTURE) {
+            addPawnMove(chessMoves, myPosition, diagLeft, 8);
+        }
+    }
 
-        return chessMoves;
+    private void blackPawnMoves(ChessBoard board, ChessPosition myPosition, Collection<ChessMove> chessMoves) {
+        var newPosition = new ChessPosition(myPosition.getRow() - 1, myPosition.getColumn());
+        MoveState moveState = validateMove(board, this, myPosition, newPosition);
+        if (moveState == MoveState.VALID) {
+            addPawnMove(chessMoves, myPosition, newPosition, 1);
+            if (myPosition.getRow() == 7) {
+                var doubleMove = new ChessPosition(myPosition.getRow() - 2, myPosition.getColumn());
+                if (validateMove(board, this, myPosition, doubleMove) == MoveState.VALID) {
+                    addPawnMove(chessMoves, myPosition, doubleMove, 1);
+                }
+            }
+        }
+        var diagRight = new ChessPosition(myPosition.getRow() - 1, myPosition.getColumn() + 1);
+        if (validateMove(board, this, myPosition, diagRight) == MoveState.CAPTURE) {
+            addPawnMove(chessMoves, myPosition, diagRight, 1);
+        }
+        var diagLeft = new ChessPosition(myPosition.getRow() - 1, myPosition.getColumn() - 1);
+        if (validateMove(board, this, myPosition, diagLeft) == MoveState.CAPTURE) {
+            addPawnMove(chessMoves, myPosition, diagLeft, 1);
+        }
+    }
+
+    private void addPawnMove(Collection<ChessMove> chessMoves, ChessPosition myPosition,
+                             ChessPosition newPosition, int promotionRow) {
+        if (newPosition.getRow() == promotionRow) {
+            pawnPromotion(chessMoves, myPosition, newPosition);
+        } else {
+            chessMoves.add(new ChessMove(myPosition, newPosition, null));
+        }
     }
 
         public MoveState validateMove(ChessBoard board, ChessPiece chessPiece, ChessPosition currentChessPosition, ChessPosition newChessPosition) {
