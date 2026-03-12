@@ -175,5 +175,4 @@ public class DataAccessTests {
                 gameDAO.updateGame(new GameData(95257, "sarah", null, "goodgame", new ChessGame())));
     }
 
-
 }
