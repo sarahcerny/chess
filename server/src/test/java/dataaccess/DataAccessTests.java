@@ -159,11 +159,21 @@ public class DataAccessTests {
     public void emptyListWorks() throws DataAccessException {
         assertTrue(gameDAO.listGames().isEmpty());
     }
+    // sarah joins white and we can see it saved slay get it girl
+    @Test
+    public void playerAddedToGame() throws DataAccessException {
+        int id = gameDAO.createGame(new GameData(0, null, null, "goodgame", new ChessGame()));
+        gameDAO.updateGame(new GameData(id, "sarah", null, "goodgame", new ChessGame()));
+        GameData updated = gameDAO.getGame(id);
+        assertEquals("sarah", updated.whiteUsername());
+    }
 
-
-
-
-
+    // updating game 95257 that doesnt exist shouldnt crash we are professionals
+    @Test
+    public void tempGameWorks() {
+        assertDoesNotThrow(() ->
+                gameDAO.updateGame(new GameData(95257, "sarah", null, "goodgame", new ChessGame())));
+    }
 
 
 }
