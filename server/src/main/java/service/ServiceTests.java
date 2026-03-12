@@ -1,7 +1,6 @@
 package service;
 
-import dataaccess.DataAccessException;
-import dataaccess.MemoryDataAccess;
+import dataaccess.*;
 import model.AuthData;
 import model.GameData;
 import org.junit.jupiter.api.BeforeEach;
@@ -19,9 +18,11 @@ public class ServiceTests {
     // runs before every single test fresh start so nothing overflows
     @BeforeEach
     public void setup() throws DataAccessException {
-        var dataAccess = new MemoryDataAccess();
-        userService = new UserService(dataAccess, dataAccess);
-        gameService = new GameService(dataAccess, dataAccess, dataAccess);
+        var userDAO = new MemoryUserDAO();
+        var authDAO = new MemoryAuthDAO();
+        var gameDAO = new MemoryGameDAO();
+        userService = new UserService(userDAO, authDAO);
+        gameService = new GameService(userDAO, authDAO, gameDAO);
         //gotta clean it clear
         gameService.clear();
     }

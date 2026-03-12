@@ -12,7 +12,8 @@ public class MemoryUserDAO implements UserDAO {
     }
 
     public void createUser(UserData user) throws DataAccessException {
-        users.put(user.username(), user);
+        String hashedPassword = org.mindrot.jbcrypt.BCrypt.hashpw(user.password(), org.mindrot.jbcrypt.BCrypt.gensalt());
+        users.put(user.username(), new UserData(user.username(), hashedPassword, user.email()));
     }
 
     public UserData getUser(String username) throws DataAccessException {

@@ -168,7 +168,7 @@ public class DataAccessTests {
         assertEquals("sarah", updated.whiteUsername());
     }
 
-    // updating game 95257 that doesnt exist shouldnt crash we are professionals
+    // updating game 95257 that does exist
     @Test
     public void tempGameWorks() {
         assertDoesNotThrow(() ->
