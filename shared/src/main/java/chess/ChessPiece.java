@@ -1,12 +1,9 @@
 package chess;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.*;
-
-
 /**
  * Represents a single chess piece
  * <p>
@@ -14,7 +11,6 @@ import java.util.*;
  * signature of the existing methods.
  */
 public class ChessPiece {
-
     private final ChessGame.TeamColor pieceColor;
     private final PieceType type;
 
@@ -22,7 +18,6 @@ public class ChessPiece {
         this.pieceColor = pieceColor;
         this.type = type;
     }
-
     /**
      * The various different chess piece options
      */
@@ -40,21 +35,18 @@ public class ChessPiece {
         INVALID,
         CAPTURE
     }
-
     /**
      * @return Which team this chess piece belongs to
      */
     public ChessGame.TeamColor getTeamColor() {
         return pieceColor;
     }
-
     /**
      * @return which type of chess piece this piece is
      */
     public PieceType getPieceType() {
         return type;
     }
-
     /**
      * Calculates all the positions a chess piece can move to
      * Does not take into account moves that are illegal due to leaving the king in
@@ -136,11 +128,8 @@ public class ChessPiece {
             } else {
                 break;
             }
-
             currentRowChange++;
             currentColumnChange++;
-
-
         }
 //I am going to move a piece up and to the left
 /** upper left  */
@@ -202,13 +191,8 @@ public class ChessPiece {
             downrightRowChange++;
             downrightColumnChange++;
         }
-
         return chessMoves;
     }
-// now I am creating a piece Moves Horizontal for pieces like rook and queen
-    /**
-     * horizontal
-     */
     private Collection<ChessMove> pieceMovesHorizontal(ChessBoard board, ChessPosition myPosition, PieceType pieceType) {
         Collection<ChessMove> chessMoves = new ArrayList<ChessMove>();
         /** horizontal */
@@ -246,10 +230,6 @@ public class ChessPiece {
         }
         return chessMoves;
     }
-    // creating this function so that when I have a piece that checks for vertical
-    /**
-     * Vertical
-     */
     private Collection<ChessMove> pieceMovesVertical(ChessBoard board, ChessPosition myPosition, PieceType pieceType) {
         Collection<ChessMove> chessMoves = new ArrayList<ChessMove>();
         /** Vertical */
@@ -412,14 +392,12 @@ public class ChessPiece {
 
         return chessMoves;
     }
-
     private void pawnPromotion(Collection<ChessMove> chessMoves, ChessPosition myPosition, ChessPosition newPosition) {
         chessMoves.add(new ChessMove(myPosition, newPosition, PieceType.QUEEN));
         chessMoves.add(new ChessMove(myPosition, newPosition, PieceType.ROOK));
         chessMoves.add(new ChessMove(myPosition, newPosition, PieceType.BISHOP));
         chessMoves.add(new ChessMove(myPosition, newPosition, PieceType.KNIGHT));
     }
-
     private Collection<ChessMove> pieceMovesPawn(ChessBoard board, ChessPosition myPosition, PieceType pieceType) {
         Collection<ChessMove> chessMoves = new ArrayList<ChessMove>();
         if (pieceColor == ChessGame.TeamColor.WHITE) {
@@ -430,7 +408,6 @@ public class ChessPiece {
         }
         return chessMoves;
     }
-
     private void whitePawnMoves(ChessBoard board, ChessPosition myPosition, Collection<ChessMove> chessMoves) {
         var newPosition = new ChessPosition(myPosition.getRow() + 1, myPosition.getColumn());
         MoveState moveState = validateMove(board, this, myPosition, newPosition);
@@ -452,7 +429,6 @@ public class ChessPiece {
             addPawnMove(chessMoves, myPosition, diagLeft, 8);
         }
     }
-
     private void blackPawnMoves(ChessBoard board, ChessPosition myPosition, Collection<ChessMove> chessMoves) {
         var newPosition = new ChessPosition(myPosition.getRow() - 1, myPosition.getColumn());
         MoveState moveState = validateMove(board, this, myPosition, newPosition);
@@ -483,60 +459,26 @@ public class ChessPiece {
             chessMoves.add(new ChessMove(myPosition, newPosition, null));
         }
     }
-
-        public MoveState validateMove(ChessBoard board, ChessPiece chessPiece, ChessPosition currentChessPosition, ChessPosition newChessPosition) {
-        // Is this a valid currentChessPosition on the board
-        if (currentChessPosition.getRow() > 8) {
-            return MoveState.INVALID;
-        }
-
-        if (currentChessPosition.getRow() < 1) {
-            return MoveState.INVALID;
-        }
-
-        if (currentChessPosition.getColumn() > 8) {
-            return MoveState.INVALID;
-        }
-
-        if (currentChessPosition.getColumn() < 1) {
-            return MoveState.INVALID;
-        }
-
-        // Is this a valid newChessPosition on the board
-        if (newChessPosition.getRow() > 8) {
-            return MoveState.INVALID;
-        }
-
-        if (newChessPosition.getRow() < 1) {
-            return MoveState.INVALID;
-        }
-
-        if (newChessPosition.getColumn() > 8) {
-            return MoveState.INVALID;
-        }
-
-        if (newChessPosition.getColumn() < 1) {
-            return MoveState.INVALID;
-        }
+    private boolean isInBounds(ChessPosition pos) {
+        return pos.getRow() >= 1 && pos.getRow() <= 8
+                && pos.getColumn() >= 1 && pos.getColumn() <= 8;
+    }
+    public MoveState validateMove(ChessBoard board, ChessPiece chessPiece, ChessPosition currentChessPosition, ChessPosition newChessPosition) {
+        if (!isInBounds(currentChessPosition)) return MoveState.INVALID;
+        if (!isInBounds(newChessPosition)) return MoveState.INVALID;
 
         var myPieceColor = chessPiece.getTeamColor();
         ChessPiece newChessPositionPiece = board.getPiece(newChessPosition);
 
-        // If there is nothing on the space.  The space is a valid move
-        // If something is there we need to do further validation
         if (newChessPositionPiece != null) {
-            // If the spot is owned by my color.  Not a valid move
             if (newChessPositionPiece.getTeamColor() == myPieceColor) {
                 return MoveState.INVALID;
             }
-
             return MoveState.CAPTURE;
         }
 
         return MoveState.VALID;
     }
-
-
 
     @Override
     public boolean equals(Object o) {
@@ -545,7 +487,6 @@ public class ChessPiece {
         }
         return pieceColor == that.pieceColor && type == that.type;
     }
-
     @Override
     public int hashCode() {
         return Objects.hash(pieceColor, type);
