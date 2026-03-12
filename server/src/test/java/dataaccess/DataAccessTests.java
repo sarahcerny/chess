@@ -7,7 +7,6 @@ import model.UserData;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;
 import service.UserService;
-// import service.AuthService;
 import service.GameService;
 import javax.xml.crypto.Data;
 
@@ -96,7 +95,7 @@ public class DataAccessTests {
         assertEquals("weston", result.username());
     }
 
-    // calling cap on token returns null not an explosion we stay calm here
+    // calling cap on token returns null stay calm quota
     @Test
     public void isnaAuthTurnsNull() throws DataAccessException {
         assertNull(authDAO.getAuth("captoken"));
@@ -141,6 +140,24 @@ public class DataAccessTests {
         int id = gameDAO.createGame(new GameData(0, null, null, "goodgame", new ChessGame()));
         GameData found = gameDAO.getGame(id);
         assertEquals("goodgame", found.gameName());
+    }
+    @Test
+    public void notRealIdIsNull() throws DataAccessException {
+        assertNull(gameDAO.getGame(95257));
+    }
+
+    // two games in the list
+    @Test
+    public void gameListWorks() throws DataAccessException {
+        gameDAO.createGame(new GameData(0, null, null, "game1", new ChessGame()));
+        gameDAO.createGame(new GameData(0, null, null, "game2", new ChessGame()));
+        assertEquals(2, gameDAO.listGames().size());
+    }
+
+    // empty list is valid too not an error we respect the empty era
+    @Test
+    public void emptyListWorks() throws DataAccessException {
+        assertTrue(gameDAO.listGames().isEmpty());
     }
 
 
