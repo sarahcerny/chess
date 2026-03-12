@@ -114,6 +114,35 @@ public class DataAccessTests {
     public void deleteTempToken() {
         assertDoesNotThrow(() -> authDAO.deleteAuth("faketoken"));
     }
+    // clear wipes all games gone gone gone periodt
+    @Test
+    public void allGamesClear() throws DataAccessException {
+        gameDAO.createGame(new GameData(0, null, null, "goodgame", new ChessGame()));
+        gameDAO.clear();
+        assertTrue(gameDAO.listGames().isEmpty());
+    }
+
+    // new game gets created and returns a real id not 0 slay king
+    @Test
+    public void newGameGo() throws DataAccessException {
+        int id = gameDAO.createGame(new GameData(0, null, null, "goodgame", new ChessGame()));
+        assertTrue(id > 0);
+    }
+
+    // null game name should blow up bc every game needs a name bestie
+    @Test
+    public void nullNoNameFails() {
+        assertThrows(DataAccessException.class, () ->
+                gameDAO.createGame(new GameData(0, null, null, null, new ChessGame())));
+    }
+    // get back the right game by id we love accuracy
+    @Test
+    public void findGameWorks() throws DataAccessException {
+        int id = gameDAO.createGame(new GameData(0, null, null, "goodgame", new ChessGame()));
+        GameData found = gameDAO.getGame(id);
+        assertEquals("goodgame", found.gameName());
+    }
+
 
 
 
