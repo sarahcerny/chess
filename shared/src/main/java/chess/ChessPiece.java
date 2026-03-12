@@ -464,8 +464,8 @@ public class ChessPiece {
                 && pos.getColumn() >= 1 && pos.getColumn() <= 8;
     }
     public MoveState validateMove(ChessBoard board, ChessPiece chessPiece, ChessPosition currentChessPosition, ChessPosition newChessPosition) {
-        if (!isInBounds(currentChessPosition)) return MoveState.INVALID;
-        if (!isInBounds(newChessPosition)) return MoveState.INVALID;
+        if (!isInBounds(currentChessPosition)) { return MoveState.INVALID; }
+        if (!isInBounds(newChessPosition)) { return MoveState.INVALID; }
 
         var myPieceColor = chessPiece.getTeamColor();
         ChessPiece newChessPositionPiece = board.getPiece(newChessPosition);
