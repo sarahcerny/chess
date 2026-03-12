@@ -88,6 +88,35 @@ public class DataAccessTests {
         assertThrows(DataAccessException.class, () ->
                 authDAO.createAuth(new AuthData("supertoken", "sarah")));
     }
+    // token comes back with the right username attached slay
+    @Test
+    public void findAuthPass() throws DataAccessException {
+        authDAO.createAuth(new AuthData("supertoken", "weston"));
+        AuthData result = authDAO.getAuth("supertoken");
+        assertEquals("weston", result.username());
+    }
+
+    // calling cap on token returns null not an explosion we stay calm here
+    @Test
+    public void isnaAuthTurnsNull() throws DataAccessException {
+        assertNull(authDAO.getAuth("captoken"));
+    }
+
+    // player logs out token gets yeeted
+    @Test
+    public void logoutTokenSuccess() throws DataAccessException {
+        authDAO.createAuth(new AuthData("supertoken", "weston"));
+        authDAO.deleteAuth("supertoken");
+        assertNull(authDAO.getAuth("supertoken"));
+    }
+    // faketoken never existed shouldnt blow up we are unbothered
+    @Test
+    public void deleteTempToken() {
+        assertDoesNotThrow(() -> authDAO.deleteAuth("faketoken"));
+    }
+
+
+
 
 
 
