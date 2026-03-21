@@ -17,4 +17,17 @@ public class Repl {
         }
     }
 
+    private String eval(String input) {
+        return switch (input.toLowerCase()) {
+            case "help" -> """
+                    register <USERNAME> <PASSWORD> <EMAIL> - to create an account
+                    login <USERNAME> <PASSWORD> - to play chess
+                    quit - playing chess
+                    help - with possible commands
+                    """;
+            case "quit" -> "Goodbye!";
+            default -> "Unknown command. Type help for options.";
+        };
+    }
+
 }
