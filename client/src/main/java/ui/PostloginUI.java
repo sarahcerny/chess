@@ -1,176 +1,180 @@
 package ui;
 
-import client.ChessBoardPrinter;
 import client.ServerFacade;
+import client.ChessBoardPrinter;
 import model.GameData;
 
-import java.util.*;
-
-import static ui.EscapeSequences.*;
+import java.util.List;
+import java.util.Scanner;
 
 public class PostloginUI {
 
-    private final ServerFacade serverFacade;
-    private final Scanner input;
-    private List<GameData> gamesList;
-    private final Map<Integer, GameData> gameMap = new HashMap<>();
+    private final ServerFacade facade;
+    private final Scanner scanner;
+    private List<GameData> lastGames;
 
-    public PostloginUI(ServerFacade serverFacade, Scanner input) {
-        this.serverFacade = serverFacade;
-        this.input = input;
+    public PostloginUI(ServerFacade facade, Scanner scanner) {
+        this.facade = facade;
+        this.scanner = scanner;
     }
 
     public void start() {
-        System.out.println(SET_TEXT_COLOR_YELLOW + "Logged in! Type 'help' to see your options.");
+        System.out.println("Welcome!");
         while (true) {
-            System.out.print(SET_TEXT_COLOR_WHITE + "[LOGGED_IN] >>> ");
-            String userAction = input.nextLine().trim();
-            var inputParts = userAction.toLowerCase().split(" ");
-            var holdInput = (inputParts.length > 0) ? inputParts[0] : "help";
-            var args = Arrays.copyOfRange(inputParts, 1, inputParts.length);
+            System.out.print("postlogin> ");
+            String command = scanner.nextLine().trim().toLowerCase();
 
-            String result = switch (holdInput) {
-                case "help"    -> helpMenu();
-                case "logout"  -> {
+            switch (command) {
+                case "help" -> printHelp();
+                case "logout" -> {
                     logout();
-                    yield "logout";
+                    return;
                 }
-                case "create"  -> makeGame(args);
-                case "list"    -> getGames();
-                case "play"    -> playChess(args);
-                case "observe" -> viewGame(args);
-                case "quit"    -> {
-                    System.out.println(SET_TEXT_COLOR_RED + "Leaving chess. Goodbye!");
-                    yield "quit";
+                case "create game" -> createGame();
+                case "list games" -> listGames();
+                case "play game" -> playGame();
+                case "observe game" -> observeGame();
+                case "reset" -> {
+                    resetDatabase();
+                    return;
                 }
-                default -> SET_TEXT_COLOR_RED + "Unknown command. Type 'help' to see available commands.";
-            };
-
-            System.out.println(result);
-            if (result.equals("logout") || result.equals("quit")) return;
+                default -> System.out.println("Unknown command. Type 'help'.");
+            }
         }
     }
 
-    private String helpMenu() {
-        return SET_TEXT_COLOR_YELLOW +
-                "  create <NAME>         - create a new game\n" +
-                "  list                  - list all games\n" +
-                "  play <NUM> <COLOR>    - join a game as white or black\n" +
-                "  observe <NUM>         - watch a game\n" +
-                "  logout                - log out\n" +
-                "  quit                  - exit the program\n" +
-                "  help                  - show this menu";
+    private void resetDatabase() {
+        try {
+            facade.clearDatabase();
+            System.out.println("Database cleared! Returning to prelogin menu.");
+        } catch (Exception e) {
+            printServerError(e);
+        }
+    }
+
+    private void printHelp() {
+        System.out.println("Available commands:");
+        System.out.println("  help         - show this help message");
+        System.out.println("  logout       - log out and return to prelogin menu");
+        System.out.println("  create game  - create a new game");
+        System.out.println("  list games   - list all existing games");
+        System.out.println("  play game    - join a game to play");
+        System.out.println("  observe game - observe a game (white perspective)");
+        System.out.println("  reset        - reset all games");
     }
 
     private void logout() {
         try {
-            serverFacade.logout();
-            System.out.println(SET_TEXT_COLOR_GREEN + "Logged out successfully!");
+            facade.logout();
+            System.out.println("Logged out successfully!");
         } catch (Exception e) {
-            System.out.println(handleError(e));
+            printServerError(e);
         }
     }
 
-    private String makeGame(String[] args) {
-        if (args.length < 1) {
-            return SET_TEXT_COLOR_RED + "Missing game name. Usage: create <NAME>";
-        }
-        if (args.length > 1) {
-            return SET_TEXT_COLOR_RED + "Too many arguments. Usage: create <NAME>";
+    private void createGame() {
+        System.out.print("Enter new game name: ");
+        String name = scanner.nextLine().trim();
+        if (name.isEmpty()) {
+            System.out.println("Error: game name cannot be empty");
+            return;
         }
         try {
-            String gameTitle = args[0];
-            serverFacade.createGame(gameTitle);
-            return SET_TEXT_COLOR_GREEN + "Game '" + gameTitle + "' created!";
+            facade.createGame(name);
+            System.out.println("Game '" + name + "' created successfully!");
         } catch (Exception e) {
-            return handleError(e);
+            printServerError(e);
         }
     }
 
-    private String getGames() {
+    private void listGames() {
         try {
-            gamesList = serverFacade.listGames();
-            gameMap.clear();
-            if (gamesList.isEmpty()) {
-                return SET_TEXT_COLOR_YELLOW + "No games available. Create one with 'create <NAME>'!";
+            lastGames = facade.listGames();
+            if (lastGames.isEmpty()) {
+                System.out.println("No games available.");
+                return;
             }
-            StringBuilder display = new StringBuilder(SET_TEXT_COLOR_BLUE + "Current games:\n");
-            for (int i = 0; i < gamesList.size(); i++) {
-                GameData currentGame = gamesList.get(i);
-                gameMap.put(i + 1, currentGame);
-                display.append(String.format("  %d. %s | White: %s | Black: %s%n",
-                        i + 1,
-                        currentGame.gameName(),
-                        currentGame.whiteUsername() != null ? currentGame.whiteUsername() : "open",
-                        currentGame.blackUsername() != null ? currentGame.blackUsername() : "open"));
+            for (int i = 0; i < lastGames.size(); i++) {
+                GameData g = lastGames.get(i);
+                String players;
+                if (g.whiteUsername() == null && g.blackUsername() == null) {
+                    players = "No players yet";
+                } else {
+                    String white = g.whiteUsername() != null ? g.whiteUsername() : "open";
+                    String black = g.blackUsername() != null ? g.blackUsername() : "open";
+                    players = "White: " + white + ", Black: " + black;
+                }
+                System.out.printf("%d. %s (%s)%n", i + 1, g.gameName(), players);
             }
-            return display.toString();
         } catch (Exception e) {
-            return handleError(e);
+            printServerError(e);
         }
     }
 
-    private String playChess(String[] args) {
-        if (args.length < 2) {
-            return SET_TEXT_COLOR_RED + "Missing arguments. Usage: play <NUM> <COLOR>";
-        }
-        if (args.length > 2) {
-            return SET_TEXT_COLOR_RED + "Too many arguments. Usage: play <NUM> <COLOR>";
-        }
-        if (gameMap.isEmpty()) {
-            return SET_TEXT_COLOR_RED + "No games loaded. Type 'list' first.";
+    private void playGame() {
+        if (lastGames == null || lastGames.isEmpty()) {
+            System.out.println("No games to play. Use 'list games' first.");
+            return;
         }
         try {
-            int gameNum = Integer.parseInt(args[0]);
-            String teamColor = args[1].toUpperCase();
-
-            if (!teamColor.equals("WHITE") && !teamColor.equals("BLACK")) {
-                return SET_TEXT_COLOR_RED + "Invalid color. Choose 'white' or 'black'.";
-            }
-            if (!gameMap.containsKey(gameNum)) {
-                return SET_TEXT_COLOR_RED + "Invalid game number. Type 'list' to see available games.";
+            System.out.print("Enter game number to join: ");
+            int number = Integer.parseInt(scanner.nextLine().trim());
+            if (number < 1 || number > lastGames.size()) {
+                System.out.println("Invalid game number.");
+                return;
             }
 
-            GameData currentGame = gameMap.get(gameNum);
-            serverFacade.joinGame(currentGame.gameID(), teamColor);
-            System.out.println(SET_TEXT_COLOR_GREEN + "Joined '" + currentGame.gameName() + "' as " + teamColor + "!");
-            ChessBoardPrinter.drawBoard(currentGame.game(), teamColor);
-            return SET_TEXT_COLOR_YELLOW + "Returned to post-login menu.";
+            GameData gameData = lastGames.get(number - 1);
+
+            System.out.print("Enter color (white/black): ");
+            String color = scanner.nextLine().trim().toLowerCase();
+            if (!color.equals("white") && !color.equals("black")) {
+                System.out.println("Invalid color. Choose 'white' or 'black'.");
+                return;
+            }
+
+            facade.joinGame(gameData.gameID(), color);
+            System.out.println("Joined game '" + gameData.gameName() + "' as " + color + "!");
+
+            ChessBoardPrinter.drawBoard(gameData.game(), color);
+
         } catch (NumberFormatException e) {
-            return SET_TEXT_COLOR_RED + "Invalid game number. Please enter a number.";
+            System.out.println("Invalid input: please enter a number");
         } catch (Exception e) {
-            return handleError(e);
+            printServerError(e);
         }
     }
 
-    private String viewGame(String[] args) {
-        if (args.length < 1) {
-            return SET_TEXT_COLOR_RED + "Missing game number. Usage: observe <NUM>";
-        }
-        if (gameMap.isEmpty()) {
-            return SET_TEXT_COLOR_RED + "No games loaded. Type 'list' first.";
+    private void observeGame() {
+        if (lastGames == null || lastGames.isEmpty()) {
+            System.out.println("No games to observe. Use 'list games' first.");
+            return;
         }
         try {
-            int gameNum = Integer.parseInt(args[0]);
-            if (!gameMap.containsKey(gameNum)) {
-                return SET_TEXT_COLOR_RED + "Invalid game number. Type 'list' to see available games.";
+            System.out.print("Enter game number to observe: ");
+            int number = Integer.parseInt(scanner.nextLine().trim());
+            if (number < 1 || number > lastGames.size()) {
+                System.out.println("Invalid game number.");
+                return;
             }
-            GameData currentGame = gameMap.get(gameNum);
-            System.out.println(SET_TEXT_COLOR_GREEN + "Observing '" + currentGame.gameName() + "':");
-            ChessBoardPrinter.drawBoard(currentGame.game(), "WHITE");
-            return SET_TEXT_COLOR_YELLOW + "Returned to post-login menu.";
+
+            GameData gameData = lastGames.get(number - 1);
+            System.out.println("Observing game '" + gameData.gameName() + "' (white perspective):");
+            ChessBoardPrinter.drawBoard(gameData.game(), "white");
+
         } catch (NumberFormatException e) {
-            return SET_TEXT_COLOR_RED + "Invalid game number. Please enter a number.";
+            System.out.println("Invalid input: please enter a number");
         } catch (Exception e) {
-            return handleError(e);
+            printServerError(e);
         }
     }
 
-    private String handleError(Exception e) {
+    private void printServerError(Exception e) {
         String msg = e.getMessage();
         if (msg != null) {
-            return SET_TEXT_COLOR_RED + "Error: " + msg;
+            System.out.println("Error: " + msg);
+        } else {
+            System.out.println("Unknown error");
         }
-        return SET_TEXT_COLOR_RED + "Something went wrong. Please try again.";
     }
 }
