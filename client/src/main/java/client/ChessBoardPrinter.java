@@ -16,6 +16,10 @@ public class ChessBoardPrinter {
     private static final String homeColor = "\u001b[31m";
     private static final String awayColor = "\u001b[34m";
 
+
+    private static final String[] COL_LABELS_WHITE = {"a", "b", "c", "d", "e", "f", "g", "h"};
+    private static final String[] COL_LABELS_BLACK = {"h", "g", "f", "e", "d", "c", "b", "a"};
+
     public static void drawBoard(ChessGame game, String perspective) {
         var out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
         boolean whiteView = perspective.equalsIgnoreCase("white");
