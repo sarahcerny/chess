@@ -2,10 +2,15 @@ package client;
 
 import chess.ChessGame;
 import com.google.gson.Gson;
-import model.*;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonArray;
+import model.AuthData;
+import model.GameData;
+import model.UserData;
 import java.io.*;
 import java.net.*;
 import java.util.ArrayList;
+import java.util.Map;
 
 public class ServerFacade {
 
@@ -18,8 +23,8 @@ public class ServerFacade {
     }
 
     public String login(String username, String password) {
-        AuthData received = callServer("POST", "/session",
-                new UsernameAndPassword(username, password), AuthData.class);
+        var requestData = Map.of("username", username, "password", password);
+        AuthData received = callServer("POST", "/session", requestData, AuthData.class);
         sessionToken = received.authToken();
         return sessionToken;
     }
@@ -38,10 +43,11 @@ public class ServerFacade {
     }
     // let the games begin
 
-    public GameID createGame(String gameTitle) {
+    public int createGame(String gameTitle) {
         requireLogin();
-        return callServer("POST", "/game",
-                new GameData(0, null, null, gameTitle, null), GameID.class);
+        var requestData = Map.of("gameName", gameTitle);
+        JsonObject response = callServer("POST", "/game", requestData, JsonObject.class);
+        return response.get("gameID").getAsInt();
     }
 
     public ArrayList<GameData> listGames() {
@@ -51,8 +57,8 @@ public class ServerFacade {
 
     public void joinGame(int gameNumber, String teamColor) {
         requireLogin();
-        callServer("PUT", "/game",
-                new ColorAndGame(ChessGame.TeamColor.valueOf(teamColor), gameNumber), null);
+        var requestData = Map.of("playerColor", teamColor, "gameID", gameNumber);
+        callServer("PUT", "/game", requestData, null);
     }
 
     public void clearDatabase() {
