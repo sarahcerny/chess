@@ -52,6 +52,27 @@ public class ChessBoardPrinter {
         }
         return cols;
     }
+    private static String buildRow(ChessBoard board, int row, int[] colOrder, boolean whiteView) {
+        StringBuilder rowString = new StringBuilder();
+        for (int col : colOrder) {
+            boolean findWhiteSquare = (row + col) % 2 == 0;
+            String tileColor = findWhiteSquare ? whiteTile : blackTile;
+            boolean homeSide = whiteView ? row <= 2 : row >= 7;
+            String textColor = homeSide ? homeColor : awayColor;
+            ChessPiece piece = board.getPiece(new ChessPosition(row, col));
+            rowString.append(tileColor)
+                    .append(textColor)
+                    .append(" ")
+                    .append(getLetter(piece))
+                    .append(" ")
+                    .append(resetColor);
+        }
+        return rowString.toString();
+    }
+
+
+
+
 
 
 
