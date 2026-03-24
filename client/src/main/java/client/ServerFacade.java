@@ -82,4 +82,25 @@ public class ServerFacade {
             }
         }
 
+    private void writeData(Object requestData, HttpURLConnection connection) throws IOException {
+        if (requestData != null) {
+            connection.addRequestProperty("Content-Type", "application/json");
+            OutputStream outputStream = connection.getOutputStream();
+            outputStream.write(gson.toJson(requestData).getBytes());
+        }
+    }
+
+    private <T> T readAnswer(HttpURLConnection connection, Class<T> responseClass) throws IOException {
+        if (responseClass != null && connection.getContentLength() < 0) {
+            InputStream inputStream = connection.getInputStream();
+            InputStreamReader streamReader = new InputStreamReader(inputStream);
+            return gson.fromJson(streamReader, responseClass);
+        }
+        return null;
+    }
+
+    public String getSessionToken() { return sessionToken; }
+}
+
+
 
