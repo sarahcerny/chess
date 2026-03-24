@@ -113,14 +113,18 @@ public class ServerFacade {
     }
 
     private <T> T readAnswer(HttpURLConnection connection, Class<T> responseClass) throws IOException {
-        if (responseClass == null) return null;
+        if (responseClass == null) {
+            return null;
+        }
         InputStream inputStream;
         try {
             inputStream = connection.getInputStream();
         } catch (IOException e) {
             inputStream = connection.getErrorStream();
         }
-        if (inputStream == null) return null;
+        if (inputStream == null) {
+            return null;
+        }
         InputStreamReader streamReader = new InputStreamReader(inputStream);
         return gson.fromJson(streamReader, responseClass);
     }
