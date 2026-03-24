@@ -20,4 +20,19 @@ public class ChessBoardPrinter {
         var out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
         boolean whiteView = perspective.equalsIgnoreCase("white");
         ChessBoard board = game.getBoard();
+
+        String[] colLabels = whiteView ? COL_LABELS_WHITE : COL_LABELS_BLACK;
+        printHeader(out, colLabels);
+
+        int[] rowOrder = buildRowOrder(whiteView);
+        int[] colOrder = buildColOrder(whiteView);
+
+        for (int row : rowOrder) {
+            out.print(row + " ");
+            out.print(buildRow(board, row, colOrder, whiteView));
+            out.println(" " + row);
+        }
+
+        printHeader(out, colLabels);
+        out.println(resetColor);
     }
