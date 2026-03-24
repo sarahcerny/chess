@@ -6,7 +6,6 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.*;
-
 import com.google.gson.Gson;
 
 public class ServerFacade {
@@ -35,7 +34,7 @@ public class ServerFacade {
 
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
         if (response.statusCode() != 200) {
-            throw new Exception("Login failed: " + response.body());
+            throw handleFailure(response);
         }
 
         var result = gson.fromJson(response.body(), Map.class);
@@ -56,7 +55,7 @@ public class ServerFacade {
 
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
         if (response.statusCode() != 200) {
-            throw new Exception("Registration failed: " + response.body());
+            throw handleFailure(response);
         }
 
         var result = gson.fromJson(response.body(), Map.class);
@@ -66,9 +65,7 @@ public class ServerFacade {
     }
 
     public void logout() throws Exception {
-        if (authToken == null) {
-            throw new IllegalStateException("Not logged in");
-        }
+        if (authToken == null) throw new IllegalStateException("Not logged in");
 
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(new URI(baseUrl + "/session"))
@@ -78,7 +75,7 @@ public class ServerFacade {
 
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
         if (response.statusCode() != 200) {
-            throw new Exception("Logout failed: " + response.body());
+            throw handleFailure(response);
         }
 
         authToken = null;
@@ -86,9 +83,7 @@ public class ServerFacade {
     }
 
     public int createGame(String gameName) throws Exception {
-        if (authToken == null) {
-            throw new IllegalStateException("Not logged in");
-        }
+        if (authToken == null) throw new IllegalStateException("Not logged in");
 
         var requestObj = Map.of("gameName", gameName);
         String requestBody = gson.toJson(requestObj);
@@ -102,7 +97,7 @@ public class ServerFacade {
 
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
         if (response.statusCode() != 200) {
-            throw new Exception("Create game failed: " + response.body());
+            throw handleFailure(response);
         }
 
         var result = gson.fromJson(response.body(), Map.class);
@@ -110,9 +105,7 @@ public class ServerFacade {
     }
 
     public List<GameData> listGames() throws Exception {
-        if (authToken == null) {
-            throw new IllegalStateException("Not logged in");
-        }
+        if (authToken == null) throw new IllegalStateException("Not logged in");
 
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(new URI(baseUrl + "/game"))
@@ -122,16 +115,14 @@ public class ServerFacade {
 
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
         if (response.statusCode() != 200) {
-            throw new Exception("List games failed: " + response.body());
+            throw handleFailure(response);
         }
 
         return gson.fromJson(response.body(), GamesList.class).games();
     }
 
     public void joinGame(int gameId, String color) throws Exception {
-        if (authToken == null) {
-            throw new IllegalStateException("Not logged in");
-        }
+        if (authToken == null) throw new IllegalStateException("Not logged in");
 
         var requestObj = Map.of("playerColor", color, "gameID", gameId);
         String requestBody = gson.toJson(requestObj);
@@ -145,7 +136,7 @@ public class ServerFacade {
 
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
         if (response.statusCode() != 200) {
-            throw new Exception("Join game failed: " + response.body());
+            throw handleFailure(response);
         }
     }
 
@@ -157,16 +148,21 @@ public class ServerFacade {
 
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
         if (response.statusCode() != 200) {
-            throw new Exception("Database reset failed: " + response.body());
+            throw handleFailure(response);
         }
     }
 
-    public String getAuthToken() {
-        return authToken;
-    }
+    public String getAuthToken() { return authToken; }
+    public String getUsername() { return username; }
 
-    public String getUsername() {
-        return username;
+    private Exception handleFailure(HttpResponse<String> response) {
+        try {
+            var body = gson.fromJson(response.body(), Map.class);
+            String message = (String) body.get("message");
+            return new Exception(message);
+        } catch (Exception e) {
+            return new Exception("Error: " + response.statusCode());
+        }
     }
 
     private record GamesList(List<GameData> games) {}
