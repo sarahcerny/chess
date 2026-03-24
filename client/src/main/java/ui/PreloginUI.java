@@ -2,69 +2,109 @@ package ui;
 
 import client.ServerFacade;
 
+import java.util.Arrays;
+import java.util.Scanner;
+
 public class PreloginUI {
+    private final ServerFacade serverFacade;
+    private String sessionToken;
+    private final Scanner input;
 
-    private final ServerFacade facade;
-
-    public PreloginUI(ServerFacade facade) {
-        this.facade = facade;
+    public PreloginUI(ServerFacade serverFacade) {
+        this.serverFacade = serverFacade;
+        this.sessionToken = "";
+        this.input = new Scanner(System.in);
     }
 
-    private String help() {
-        return """
-                - register <USERNAME> <PASSWORD> <EMAIL> - to create an account
-                - login <USERNAME> <PASSWORD> - to play chess
-                - quit - playing chess
-                - help - with possible commands
-                """;
-    }
-    public String eval(String input) {
-        var tokens = input.split(" ");
-        var cmd = tokens[0];
-        return switch (cmd) {
-            case "help" -> help();
-            case "quit" -> "Goodbye!";
-            case "register" -> register(tokens);
-            case "login" -> login(tokens);
-            default -> "Unknown command. Type 'help' for options.";
-        };
+    public void start() {
+        System.out.println("Welcome to Chess! Type 'help' to get started.");
+        while (true) {
+            System.out.print("[LOGGED_OUT] >>> ");
+            String userAction = input.nextLine().trim();
+            var inputParts = userAction.toLowerCase().split(" ");
+            var holdInput = (inputParts.length > 0) ? inputParts[0] : "help";
+            var args = Arrays.copyOfRange(inputParts, 1, inputParts.length);
+
+            String result = switch (holdInput) {
+                case "help" -> helpMenu();
+                case "login" -> login(args);
+                case "register" -> register(args);
+                case "quit" -> {
+                    System.out.println("Goodbye!");
+                    yield "quit";
+                }
+                default -> "Unknown command. Type 'help' to see available commands.";
+            };
+            System.out.println(result);
+            if (result.equals("quit")) return;
+        }
     }
 
-    private String register(String[] tokens) {
-        if (tokens.length < 4) {
-            return "Usage: register <USERNAME> <PASSWORD> <EMAIL>";
+    private String login(String[] args) {
+        if (args.length < 2) {
+            return "Missing arguments. Usage: login <USERNAME> <PASSWORD>";
+        }
+        if (args.length > 2) {
+            return "Too many arguments. Usage: login <USERNAME> <PASSWORD>";
         }
         try {
-            var authData = facade.register(tokens[1], tokens[2], tokens[3]);
-            authToken = authData.authToken();
-            return "Registered and logged in as " + authData.username();
+            String username = args[0];
+            String password = args[1];
+            sessionToken = serverFacade.login(username, password);
+            System.out.println("Login successful! Welcome, " + username + "!");
+            new PostloginUI(serverFacade, input).start();
+            return "Logged out. See you next time!";
         } catch (Exception e) {
-            return "Error: " + e.getMessage();
+            return handleError(e);
         }
     }
 
-    private String login(String[] tokens) {
-        if (tokens.length < 3) {
-            return "Usage: login <USERNAME> <PASSWORD>";
+    private String register(String[] args) {
+        if (args.length < 3) {
+            return "Missing arguments. Usage: register <USERNAME> <PASSWORD> <EMAIL>";
+        }
+        if (args.length > 3) {
+            return "Too many arguments. Usage: register <USERNAME> <PASSWORD> <EMAIL>";
         }
         try {
-            var authData = facade.login(tokens[1], tokens[2]);
-            authToken = authData.authToken();
-            return "Logged in as " + authData.username();
+            String username = args[0];
+            String password = args[1];
+            String email = args[2];
+            sessionToken = serverFacade.register(username, password, email);
+            System.out.println("Registered and logged in! Welcome, " + username + "!");
+            new PostloginUI(serverFacade, input).start();
+            return "Logged out. See you next time!";
         } catch (Exception e) {
-            return "Error: " + e.getMessage();
+            return handleError(e);
         }
     }
-    private String authToken = null;
 
-    public String getAuthToken() {
-        return authToken;
+    private String handleError(Exception e) {
+        String msg = e.getMessage();
+        if (msg != null) {
+            return "Error: " + msg;
+        }
+        return "Something went wrong. Please try again.";
+    }
+
+    public String getSessionToken() {
+        return sessionToken;
     }
 
     public boolean isLoggedIn() {
-        return authToken != null;
+        return !sessionToken.isEmpty();
     }
-    public void clearAuth() {
-        authToken = null;
+
+    public void clearSession() {
+        sessionToken = "";
+    }
+
+    private String helpMenu() {
+        return """
+                - register <USERNAME> <PASSWORD> <EMAIL> - to create an account
+                - login <USERNAME> <PASSWORD> - to play chess
+                - quit - exit the program
+                - help - show this help message
+                """;
     }
 }
