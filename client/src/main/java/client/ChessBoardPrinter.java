@@ -80,7 +80,13 @@ public class ChessBoardPrinter {
             case PAWN   -> "P";
         };
     }
-
+    private static void printHeader(PrintStream out, String[] colLabels) {
+        out.print("  ");
+        for (String label : colLabels) {
+            out.print(" " + label + " ");
+        }
+        out.println();
+    }
 
 }
 
