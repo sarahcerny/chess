@@ -31,16 +31,16 @@ public class PostloginUI {
             var args = Arrays.copyOfRange(inputParts, 1, inputParts.length);
 
             String result = switch (holdInput) {
-                case "help"    -> helpMenu();
-                case "logout"  -> {
+                case "help" -> helpMenu();
+                case "logout" -> {
                     logout();
                     yield "logout";
                 }
-                case "create"  -> makeGame(args);
-                case "list"    -> getGames();
-                case "play"    -> playChess(args);
+                case "create" -> makeGame(args);
+                case "list" -> getGames();
+                case "play" -> playChess(args);
                 case "observe" -> viewGame(args);
-                case "quit"    -> {
+                case "quit" -> {
                     System.out.println(SET_TEXT_COLOR_RED + "Leaving chess. Goodbye!");
                     yield "quit";
                 }
@@ -52,4 +52,23 @@ public class PostloginUI {
         }
     }
 
+    private String helpMenu() {
+        return SET_TEXT_COLOR_YELLOW +
+                "  create <NAME>         - create a new game\n" +
+                "  list                  - list all games\n" +
+                "  play <NUM> <COLOR>    - join a game as white or black\n" +
+                "  observe <NUM>         - watch a game\n" +
+                "  logout                - log out\n" +
+                "  quit                  - exit the program\n" +
+                "  help                  - show this menu";
+    }
+
+    private void logout() {
+        try {
+            serverFacade.logout();
+            System.out.println(SET_TEXT_COLOR_GREEN + "Logged out successfully!");
+        } catch (Exception e) {
+            System.out.println(handleError(e));
+        }
+    }
 }
