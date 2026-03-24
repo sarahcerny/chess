@@ -1,6 +1,7 @@
-package client;
+package ui;
 
-import chess.ChessGame;
+import client.ChessBoardPrinter;
+import client.ServerFacade;
 import model.GameData;
 import java.util.ArrayList;
 import java.util.Arrays;
