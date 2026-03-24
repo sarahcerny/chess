@@ -1,7 +1,11 @@
 package client;
 
-import chess.*;
-import static ui.EscapeSequences.*;
+import chess.ChessGame;
+import chess.ChessBoard;
+import chess.ChessPiece;
+import chess.ChessPosition;
+import java.io.PrintStream;
+import java.nio.charset.StandardCharsets;
 
 public class ChessBoardPrinter {
 
