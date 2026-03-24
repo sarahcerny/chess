@@ -1,169 +1,136 @@
 package client;
 
-import model.GameData;
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
-import java.util.*;
+import chess.ChessGame;
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonArray;
+import model.AuthData;
+import model.GameData;
+import model.UserData;
+import java.io.*;
+import java.net.*;
+import java.util.ArrayList;
+import java.util.Map;
 
 public class ServerFacade {
 
-    private final String baseUrl;
-    private String authToken;
-    private final HttpClient client;
-    private String username;
-    private final Gson gson;
+    private final String serverAddress;
+    private String sessionToken;
+    private String currentUser;
+    private final Gson gson = new Gson();
 
     public ServerFacade(int port) {
-        this.baseUrl = "http://localhost:" + port;
-        this.client = HttpClient.newHttpClient();
-        this.gson = new Gson();
+        serverAddress = "http://localhost:" + port;
     }
 
-    public String login(String username, String password) throws Exception {
-        var requestObj = Map.of("username", username, "password", password);
-        String requestBody = gson.toJson(requestObj);
 
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(new URI(baseUrl + "/session"))
-                .header("Content-Type", "application/json")
-                .POST(HttpRequest.BodyPublishers.ofString(requestBody))
-                .build();
+    public String login(String username, String password) {
+        var requestData = Map.of("username", username, "password", password);
+        AuthData received = callServer("POST", "/session", requestData, AuthData.class);
+        sessionToken = received.authToken();
+        currentUser = username;
+        return sessionToken;
+    }
 
-        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-        if (response.statusCode() != 200) {
-            throw handleFailure(response);
+    public String register(String username, String password, String email) {
+        UserData requestData = new UserData(username, password, email);
+        AuthData received = callServer("POST", "/user", requestData, AuthData.class);
+        sessionToken = received.authToken();
+        currentUser = username;
+        return sessionToken;
+    }
+
+    public void logout() {
+        requireLogin();
+        callServer("DELETE", "/session", null, null);
+        sessionToken = null;
+        currentUser = null;
+    }
+
+
+    public int createGame(String gameTitle) {
+        requireLogin();
+        var requestData = Map.of("gameName", gameTitle);
+        JsonObject response = callServer("POST", "/game", requestData, JsonObject.class);
+        return response.get("gameID").getAsInt();
+    }
+
+    public ArrayList<GameData> listGames() {
+        requireLogin();
+        JsonObject response = callServer("GET", "/game", null, JsonObject.class);
+        JsonArray gamesArray = response.getAsJsonArray("games");
+        ArrayList<GameData> gamesList = new ArrayList<>();
+        for (var element : gamesArray) {
+            gamesList.add(gson.fromJson(element, GameData.class));
         }
-
-        var result = gson.fromJson(response.body(), Map.class);
-        this.authToken = (String) result.get("authToken");
-        this.username = username;
-        return authToken;
+        return gamesList;
     }
 
-    public String register(String username, String password, String email) throws Exception {
-        var requestObj = Map.of("username", username, "password", password, "email", email);
-        String requestBody = gson.toJson(requestObj);
-
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(new URI(baseUrl + "/user"))
-                .header("Content-Type", "application/json")
-                .POST(HttpRequest.BodyPublishers.ofString(requestBody))
-                .build();
-
-        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-        if (response.statusCode() != 200) {
-            throw handleFailure(response);
-        }
-
-        var result = gson.fromJson(response.body(), Map.class);
-        this.authToken = (String) result.get("authToken");
-        this.username = username;
-        return authToken;
+    public void joinGame(int gameNumber, String teamColor) {
+        requireLogin();
+        var requestData = Map.of("playerColor", teamColor, "gameID", gameNumber);
+        callServer("PUT", "/game", requestData, null);
     }
 
-    public void logout() throws Exception {
-        if (authToken == null) {throw new IllegalStateException("Not logged in");}
-
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(new URI(baseUrl + "/session"))
-                .header("Authorization", authToken)
-                .DELETE()
-                .build();
-
-        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-        if (response.statusCode() != 200) {
-            throw handleFailure(response);
-        }
-
-        authToken = null;
-        username = null;
+    public void clearDatabase() {
+        callServer("DELETE", "/db", null, null);
     }
 
-    public int createGame(String gameName) throws Exception {
-        if (authToken == null) {throw new IllegalStateException("Not logged in");}
 
-        var requestObj = Map.of("gameName", gameName);
-        String requestBody = gson.toJson(requestObj);
-
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(new URI(baseUrl + "/game"))
-                .header("Content-Type", "application/json")
-                .header("Authorization", authToken)
-                .POST(HttpRequest.BodyPublishers.ofString(requestBody))
-                .build();
-
-        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-        if (response.statusCode() != 200) {
-            throw handleFailure(response);
-        }
-
-        var result = gson.fromJson(response.body(), Map.class);
-        return ((Double) result.get("gameID")).intValue();
-    }
-
-    public List<GameData> listGames() throws Exception {
-        if (authToken == null) {throw new IllegalStateException("Not logged in");}
-
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(new URI(baseUrl + "/game"))
-                .header("Authorization", authToken)
-                .GET()
-                .build();
-
-        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-        if (response.statusCode() != 200) {
-            throw handleFailure(response);
-        }
-
-        return gson.fromJson(response.body(), GamesList.class).games();
-    }
-
-    public void joinGame(int gameId, String color) throws Exception {
-        if (authToken == null) {throw new IllegalStateException("Not logged in");}
-
-        var requestObj = Map.of("playerColor", color, "gameID", gameId);
-        String requestBody = gson.toJson(requestObj);
-
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(new URI(baseUrl + "/game"))
-                .header("Content-Type", "application/json")
-                .header("Authorization", authToken)
-                .PUT(HttpRequest.BodyPublishers.ofString(requestBody))
-                .build();
-
-        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-        if (response.statusCode() != 200) {
-            throw handleFailure(response);
+    private void requireLogin() {
+        if (sessionToken == null) {
+            throw new RuntimeException("You must be logged in first.");
         }
     }
 
-    public void clearDatabase() throws Exception {
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(new URI(baseUrl + "/db"))
-                .DELETE()
-                .build();
-
-        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-        if (response.statusCode() != 200) {
-            throw handleFailure(response);
-        }
-    }
-
-    public String getAuthToken() { return authToken; }
-    public String getUsername() { return username; }
-
-    private Exception handleFailure(HttpResponse<String> response) {
+    private <T> T callServer(String method, String endpoint, Object requestData, Class<T> responseClass) {
         try {
-            var body = gson.fromJson(response.body(), Map.class);
-            String message = (String) body.get("message");
-            return new Exception(message);
+            HttpURLConnection connection = (HttpURLConnection)
+                    new URI(serverAddress + endpoint).toURL().openConnection();
+            connection.setRequestMethod(method);
+            connection.setDoOutput(true);
+            connection.setRequestProperty("authorization", sessionToken);
+            writeData(requestData, connection);
+            connection.connect();
+            int statusCode = connection.getResponseCode();
+            if (statusCode != 200) {
+                throw new RuntimeException("Request failed with status: " + statusCode);
+            }
+            return readAnswer(connection, responseClass);
+        } catch (RuntimeException e) {
+            throw e;
         } catch (Exception e) {
-            return new Exception("Error: " + response.statusCode());
+            throw new RuntimeException(e);
         }
     }
 
-    private record GamesList(List<GameData> games) {}
+    private void writeData(Object requestData, HttpURLConnection connection) throws IOException {
+        if (requestData != null) {
+            connection.addRequestProperty("Content-Type", "application/json");
+            OutputStream outputStream = connection.getOutputStream();
+            outputStream.write(gson.toJson(requestData).getBytes());
+        }
+    }
+
+    private <T> T readAnswer(HttpURLConnection connection, Class<T> responseClass) throws IOException {
+        if (responseClass == null) return null;
+        InputStream inputStream;
+        try {
+            inputStream = connection.getInputStream();
+        } catch (IOException e) {
+            inputStream = connection.getErrorStream();
+        }
+        if (inputStream == null) return null;
+        InputStreamReader streamReader = new InputStreamReader(inputStream);
+        return gson.fromJson(streamReader, responseClass);
+    }
+    public void resetSession() {
+        sessionToken = null;
+        currentUser = null;
+    }
+
+
+    public String getSessionToken() { return sessionToken; }
+    public String getAuthToken()    { return sessionToken; }
+    public String getUsername()     { return currentUser; }
 }

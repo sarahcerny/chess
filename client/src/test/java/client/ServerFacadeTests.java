@@ -24,6 +24,12 @@ public class ServerFacadeTests {
     }
 
     @BeforeEach
+    void resetFacade() throws Exception {
+        facade.clearDatabase();
+        facade.resetSession();
+    }
+
+    @BeforeEach
     void clearDatabase() throws Exception {
         facade.clearDatabase();
     }
@@ -132,7 +138,7 @@ public class ServerFacadeTests {
         Assertions.assertNull(facade.getAuthToken()); // before login
     }
 
-    // what your name
+    //
     @Test
     void getUsernamePositive() throws Exception {
         facade.register("Ellie", "ellie123", "ellie@email.com");
