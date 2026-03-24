@@ -144,5 +144,34 @@ public class PostloginUI {
         }
     }
 
+    private String viewGame(String[] args) {
+        if (args.length < 1) {
+            return SET_TEXT_COLOR_RED + "Missing game number. Usage: observe <NUM>";
+        }
+        if (gameMap.isEmpty()) {
+            return SET_TEXT_COLOR_RED + "No games loaded. Type 'list' first.";
+        }
+        try {
+            int gameNum = Integer.parseInt(args[0]);
+            if (!gameMap.containsKey(gameNum)) {
+                return SET_TEXT_COLOR_RED + "Invalid game number. Type 'list' to see available games.";
+            }
+            GameData currentGame = gameMap.get(gameNum);
+            System.out.println(SET_TEXT_COLOR_GREEN + "Observing '" + currentGame.gameName() + "':");
+            ChessBoardPrinter.drawBoard(currentGame.game(), "WHITE");
+            return SET_TEXT_COLOR_YELLOW + "Returned to post-login menu.";
+        } catch (NumberFormatException e) {
+            return SET_TEXT_COLOR_RED + "Invalid game number. Please enter a number.";
+        } catch (Exception e) {
+            return handleError(e);
+        }
+    }
 
+    private String handleError(Exception e) {
+        String msg = e.getMessage();
+        if (msg != null) {
+            return SET_TEXT_COLOR_RED + "Error: " + msg;
+        }
+        return SET_TEXT_COLOR_RED + "Something went wrong. Please try again.";
+    }
 }
