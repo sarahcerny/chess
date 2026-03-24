@@ -119,7 +119,7 @@ public class PostloginUI {
 
     private void playGame(String[] params) {
         if (lastGames == null || lastGames.isEmpty()) {
-            System.out.println("No games to play. Use 'list' first.");
+            System.out.println("Please run 'list' first.");
             return;
         }
 
@@ -127,7 +127,6 @@ public class PostloginUI {
             int index;
             String color;
 
-            // Extract "play 11 WHITE"
             if (params.length >= 2) {
                 index = Integer.parseInt(params[0]) - 1;
                 color = params[1].toUpperCase();
@@ -138,62 +137,46 @@ public class PostloginUI {
                 color = scanner.nextLine().trim().toUpperCase();
             }
 
-            // Validate index
             if (index < 0 || index >= lastGames.size()) {
                 System.out.println("Invalid game number.");
                 return;
             }
 
-            GameData gameData = lastGames.get(index);
-
-            // Attempt to join via Facade
+            model.GameData gameData = lastGames.get(index);
             facade.joinGame(gameData.gameID(), color);
 
-            // If no exception was thrown, it worked!
             System.out.println("Joined successfully!");
-            ChessBoardPrinter.drawBoard(gameData.game(), color);
+            client.ChessBoardPrinter.drawBoard(gameData.game(), color);
 
-        } catch (NumberFormatException e) {
-            System.out.println("Error: Game ID must be a number.");
         } catch (Exception e) {
-            // This will catch the "bad request" or "already taken" errors from the server
-            String msg = e.getMessage();
-            if (msg.contains("403")) {
-                System.out.println("Error: That color is already taken!");
-            } else if (msg.contains("400")) {
-                System.out.println("Error: Bad request (Check your color spelling).");
-            } else {
-                printServerError(e);
-            }
+            printServerError(e);
         }
     }
 
     private void observeGame(String[] params) {
         if (lastGames == null || lastGames.isEmpty()) {
-            System.out.println("No games to observe. Use 'list' first.");
+            System.out.println("Please run 'list' first.");
             return;
         }
 
         try {
-            int number;
+            int index;
             if (params.length > 0) {
-                number = Integer.parseInt(params[0]);
+                index = Integer.parseInt(params[0]) - 1;
             } else {
                 System.out.print("Enter game number to observe: ");
-                number = Integer.parseInt(scanner.nextLine().trim());
+                index = Integer.parseInt(scanner.nextLine().trim()) - 1;
             }
 
-            if (number < 1 || number > lastGames.size()) {
+            if (index < 0 || index >= lastGames.size()) {
                 System.out.println("Invalid game number.");
                 return;
             }
 
-            GameData gameData = lastGames.get(number - 1);
-            System.out.println("Observing game '" + gameData.gameName() + "' (white perspective):");
-            ChessBoardPrinter.drawBoard(gameData.game(), "white");
+            model.GameData gameData = lastGames.get(index);
+            System.out.println("Observing " + gameData.gameName() + ":");
+            client.ChessBoardPrinter.drawBoard(gameData.game(), "WHITE");
 
-        } catch (NumberFormatException e) {
-            System.out.println("Error: Please provide a valid number.");
         } catch (Exception e) {
             printServerError(e);
         }
