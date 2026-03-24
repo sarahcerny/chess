@@ -9,26 +9,15 @@ import java.nio.charset.StandardCharsets;
 
 public class ChessBoardPrinter {
 
-    private static final String EMPTY = "   ";
-    public static void drawBoard(ChessGame game, String teamColor) {
+    private static final int SQUARE_SIZE = 3;
+    private static final String resetColor = "\u001b[0m";
+    private static final String whiteTile = "\u001b[47m";
+    private static final String blackTile = "\u001b[40m";
+    private static final String homeColor = "\u001b[31m";
+    private static final String awayColor = "\u001b[34m";
+
+    public static void drawBoard(ChessGame game, String perspective) {
+        var out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
+        boolean whiteView = perspective.equalsIgnoreCase("white");
         ChessBoard board = game.getBoard();
-        boolean isWhite = teamColor.equalsIgnoreCase("WHITE");
-        System.out.println();
-        printColumnLabels(isWhite);
-        for (int row = 0; row < 8; row++) {
-            int actualRow = isWhite ? (8 - row) : (row + 1);
-            System.out.print(SET_TEXT_COLOR_WHITE + " " + actualRow + " ");
-            for (int col = 0; col < 8; col++) {
-                int actualCol = isWhite ? (col + 1) : (8 - col);
-                boolean isLightSquare = (actualRow + actualCol) % 2 == 0;
-                String bgColor = isLightSquare ? SET_BG_COLOR_WHITE : SET_BG_COLOR_BLACK;
-                ChessPosition pos = new ChessPosition(actualRow, actualCol);
-                ChessPiece piece = board.getPiece(pos);
-                System.out.print(bgColor + getPieceDisplay(piece));
-            }
-            System.out.print(RESET_BG_COLOR + SET_TEXT_COLOR_WHITE + " " + actualRow + " ");
-            System.out.println();
-        }
     }
-
-
