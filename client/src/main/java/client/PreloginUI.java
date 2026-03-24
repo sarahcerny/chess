@@ -41,6 +41,26 @@ public class PreloginUI {
         }
     }
 
+    private String login(String[] args) {
+        if (args.length < 2) {
+            return SET_TEXT_COLOR_RED + "Missing arguments. Usage: login <USERNAME> <PASSWORD>";
+        }
+        if (args.length > 2) {
+            return SET_TEXT_COLOR_RED + "Too many arguments. Usage: login <USERNAME> <PASSWORD>";
+        }
+        try {
+            String username = args[0];
+            String password = args[1];
+            sessionToken = serverFacade.login(username, password);
+            System.out.println(SET_TEXT_COLOR_GREEN + "Login successful! Welcome, " + username + "!");
+            new PostloginUI(serverFacade, input).run();
+            return SET_TEXT_COLOR_YELLOW + "Logged out. See you next time!";
+        } catch (Exception e) {
+            return handleError(e);
+        }
+    }
+
+
 
 
 
