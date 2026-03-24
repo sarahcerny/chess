@@ -36,7 +36,7 @@ public class PreloginUI {
                 default -> "Unknown command. Type 'help' to see available commands.";
             };
             System.out.println(result);
-            if (result.equals("quit")) return;
+            if (result.equals("quit")) { return; }
         }
     }
 
@@ -98,9 +98,6 @@ public class PreloginUI {
         return !sessionToken.isEmpty();
     }
 
-    public void clearSession() {
-        sessionToken = "";
-    }
 
     private String helpMenu() {
         return """

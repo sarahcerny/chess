@@ -65,7 +65,7 @@ public class ServerFacade {
     }
 
     public void logout() throws Exception {
-        if (authToken == null) throw new IllegalStateException("Not logged in");
+        if (authToken == null) {throw new IllegalStateException("Not logged in");}
 
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(new URI(baseUrl + "/session"))
@@ -83,7 +83,7 @@ public class ServerFacade {
     }
 
     public int createGame(String gameName) throws Exception {
-        if (authToken == null) throw new IllegalStateException("Not logged in");
+        if (authToken == null) {throw new IllegalStateException("Not logged in");}
 
         var requestObj = Map.of("gameName", gameName);
         String requestBody = gson.toJson(requestObj);
@@ -105,7 +105,7 @@ public class ServerFacade {
     }
 
     public List<GameData> listGames() throws Exception {
-        if (authToken == null) throw new IllegalStateException("Not logged in");
+        if (authToken == null) {throw new IllegalStateException("Not logged in");}
 
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(new URI(baseUrl + "/game"))
@@ -122,7 +122,7 @@ public class ServerFacade {
     }
 
     public void joinGame(int gameId, String color) throws Exception {
-        if (authToken == null) throw new IllegalStateException("Not logged in");
+        if (authToken == null) {throw new IllegalStateException("Not logged in");}
 
         var requestObj = Map.of("playerColor", color, "gameID", gameId);
         String requestBody = gson.toJson(requestObj);

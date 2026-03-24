@@ -26,7 +26,7 @@ public class PostloginUI {
         while (true) {
             System.out.print("\n[LOGGED_IN] >>> ");
             String line = scanner.nextLine().trim();
-            if (line.isEmpty()) continue;
+            if (line.isEmpty()) { continue;}
 
             String[] parts = line.split("\\s+");
             String command = parts[0].toLowerCase();
@@ -45,14 +45,6 @@ public class PostloginUI {
         }
     }
 
-    private void resetDatabase() {
-        try {
-            facade.clearDatabase();
-            System.out.println("Database cleared! Returning to prelogin menu.");
-        } catch (Exception e) {
-            printServerError(e);
-        }
-    }
 
     private void printHelp() {
         System.out.println("Available commands:");

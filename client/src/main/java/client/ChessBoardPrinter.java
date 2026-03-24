@@ -50,7 +50,9 @@ public class ChessBoardPrinter {
     private static void renderFiles(PrintStream out, boolean isWhiteView) {
         out.print("  ");
         String[] files = isWhiteView ? FILES_WHITE : FILES_BLACK;
-        for (String f : files) out.print(" " + f + " ");
+        for (String f : files) {
+            out.print(" " + f + " ");
+        }
         out.println();
     }
 
@@ -60,7 +62,7 @@ public class ChessBoardPrinter {
         String symbol = getPieceSymbol(piece);
         boolean bottomSide = isWhiteView ? row >= 7 : row <= 2;
         String color = bottomSide ? HOME_COLOR : AWAY_COLOR;
-        out.print(color + " " + symbol + " " + RESET_COLOR);
+        { out.print(color + " " + symbol + " " + RESET_COLOR); }
     }
 
     private static String getPieceSymbol(ChessPiece piece) {
