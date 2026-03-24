@@ -22,7 +22,7 @@ public class PostloginUI {
         this.input = input;
     }
 
-    public void run() {
+    public void start() {
         System.out.println(SET_TEXT_COLOR_YELLOW + "Logged in! Type 'help' to see your options.");
         while (true) {
             System.out.print(SET_TEXT_COLOR_WHITE + "[LOGGED_IN] >>> ");
