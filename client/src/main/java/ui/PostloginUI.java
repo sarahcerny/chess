@@ -3,18 +3,16 @@ package ui;
 import client.ChessBoardPrinter;
 import client.ServerFacade;
 import model.GameData;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Scanner;
+
+import java.util.*;
+
 import static ui.EscapeSequences.*;
 
 public class PostloginUI {
 
     private final ServerFacade serverFacade;
     private final Scanner input;
-    private ArrayList<GameData> gamesList;
+    private List<GameData> gamesList;
     private final Map<Integer, GameData> gameMap = new HashMap<>();
 
     public PostloginUI(ServerFacade serverFacade, Scanner input) {
