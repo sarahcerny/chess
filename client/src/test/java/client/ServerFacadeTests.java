@@ -45,6 +45,23 @@ public class ServerFacadeTests {
     }
 
     // login i guess
+    @Test
+    void loginPositive() throws Exception {
+        facade.register("Maddy", "maddy123", "maddy@email.com");
+        String token = facade.login("Maddy", "maddy123");
+        Assertions.assertNotNull(token);
+        Assertions.assertTrue(token.length() > 10);
+    }
+
+    @Test
+    void loginNegative() {
+        Assertions.assertThrows(Exception.class, () ->
+                facade.login("Weston", "wrongpass")
+        );
+    }
+
+    // Logout now queen
+
 
 
 }
