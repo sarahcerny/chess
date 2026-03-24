@@ -4,6 +4,7 @@ import client.ServerFacade;
 import client.ChessBoardPrinter;
 import model.GameData;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
 
@@ -19,10 +20,17 @@ public class PostloginUI {
     }
 
     public void start() {
-        System.out.println("Welcome!");
+        System.out.println("\nWelcome to the Post-Login menu!");
+        printHelp();
+
         while (true) {
-            System.out.print("postlogin> ");
-            String command = scanner.nextLine().trim().toLowerCase();
+            System.out.print("\n[LOGGED_IN] >>> ");
+            String line = scanner.nextLine().trim();
+            if (line.isEmpty()) continue;
+
+            var parts = line.split("\\s+"); // Split by any whitespace
+            String command = parts[0].toLowerCase();
+            String[] params = Arrays.copyOfRange(parts, 1, parts.length);
 
             switch (command) {
                 case "help" -> printHelp();
@@ -30,15 +38,15 @@ public class PostloginUI {
                     logout();
                     return;
                 }
-                case "create game" -> createGame();
-                case "list games" -> listGames();
-                case "play game" -> playGame();
-                case "observe game" -> observeGame();
-                case "reset" -> {
-                    resetDatabase();
-                    return;
+                case "create" -> createGame(params);
+                case "list" -> listGames();
+                case "play" -> playGame(params);
+                case "observe" -> observeGame(params);
+                case "quit" -> {
+                    System.out.println("Exiting...");
+                    System.exit(0);
                 }
-                default -> System.out.println("Unknown command. Type 'help'.");
+                default -> System.out.println("Unknown command: " + command + ". Type 'help' for options.");
             }
         }
     }
@@ -72,9 +80,17 @@ public class PostloginUI {
         }
     }
 
-    private void createGame() {
-        System.out.print("Enter new game name: ");
-        String name = scanner.nextLine().trim();
+    private void createGame(String[] params) {
+        String name;
+
+        if (params.length > 0) {
+            name = params[0];
+        } else {
+
+            System.out.print("Enter new game name: ");
+            name = scanner.nextLine().trim();
+        }
+
         if (name.isEmpty()) {
             System.out.println("Error: game name cannot be empty");
             return;
