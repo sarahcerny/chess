@@ -8,7 +8,6 @@ import static ui.EscapeSequences.*;
 
 public class PreloginUI {
     private final ServerFacade serverFacade;
-    private final String serverAddress;
     private String sessionToken;
     private final Scanner input;
 
@@ -18,7 +17,7 @@ public class PreloginUI {
         this.input = new Scanner(System.in);
     }
 
-    public void run() {
+    public void start() {
         System.out.println(SET_TEXT_COLOR_YELLOW + "Welcome to Chess! Type 'help' to get started.");
         while (true) {
             System.out.print(SET_TEXT_COLOR_WHITE + "[LOGGED_OUT] >>> ");
@@ -41,7 +40,15 @@ public class PreloginUI {
             if (result.equals("quit")) return;
         }
     }
-
+    private String helpMenu() {
+        return SET_TEXT_COLOR_BLUE + """
+            Available commands:
+              help                             - Show this help menu
+              login <USERNAME> <PASSWORD>      - Log in to your account
+              register <USERNAME> <PASSWORD> <EMAIL> - Create a new account
+              quit                             - Exit the program
+            """;
+    }
     private String login(String[] args) {
         if (args.length < 2) {
             return SET_TEXT_COLOR_RED + "Missing arguments. Usage: login <USERNAME> <PASSWORD>";
@@ -54,7 +61,7 @@ public class PreloginUI {
             String password = args[1];
             sessionToken = serverFacade.login(username, password);
             System.out.println(SET_TEXT_COLOR_GREEN + "Login successful! Welcome, " + username + "!");
-            new PostloginUI(serverFacade, input).run();
+            new PostloginUI(serverFacade, input).start();
             return SET_TEXT_COLOR_YELLOW + "Logged out. See you next time!";
         } catch (Exception e) {
             return handleError(e);
@@ -73,7 +80,7 @@ public class PreloginUI {
             String email = args[2];
             sessionToken = serverFacade.register(username, password, email);
             System.out.println(SET_TEXT_COLOR_GREEN + "Registered and logged in! Welcome, " + username + "!");
-            new PostloginUI(serverFacade, input).run();
+            new PostloginUI(serverFacade, input).start();
             return SET_TEXT_COLOR_YELLOW + "Logged out. See you next time!";
         } catch (Exception e) {
             return handleError(e);
