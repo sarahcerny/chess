@@ -16,7 +16,7 @@ public class ServerFacade {
     public ServerFacade(int port) {
         serverAddress = "http://localhost:" + port;
     }
-    // gotta authenticate that shit.
+
     public String login(String username, String password) {
         AuthData received = callServer("POST", "/session",
                 new UsernameAndPassword(username, password), AuthData.class);
@@ -66,21 +66,35 @@ public class ServerFacade {
             }
         }
 
-        private <T> T callServer(String method, String endpoint, Object requestData, Class<T> responseClass) {
-            try {
-                HttpURLConnection connection = (HttpURLConnection)
-                        new URI(serverAddress + endpoint).toURL().openConnection();
-                connection.setRequestMethod(method);
-                connection.setDoOutput(true);
+    private <T> T callServer(String method, String endpoint, Object requestData, Class<T> responseClass) {
+        try {
+            HttpURLConnection connection = (HttpURLConnection)
+                    new URI(serverAddress + endpoint).toURL().openConnection();
+            connection.setRequestMethod(method);
+            connection.setDoOutput(true);
+            if (sessionToken != null) {
                 connection.setRequestProperty("authorization", sessionToken);
-                writeData(requestData, connection);
-                connection.connect();
-                connection.getResponseCode();
-                return readAnswer(connection, responseClass);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
             }
+            writeData(requestData, connection);
+            connection.connect();
+
+            int status = connection.getResponseCode();
+            if (status / 100 != 2) {
+                String errorBody = readStream(connection.getErrorStream());
+                var errorMap = gson.fromJson(errorBody, java.util.Map.class);
+                String message = (errorMap != null && errorMap.get("message") != null)
+                        ? (String) errorMap.get("message")
+                        : "Server error: " + status;
+                throw new RuntimeException(message);
+            }
+
+            return readAnswer(connection, responseClass);
+        } catch (RuntimeException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new RuntimeException("Connection failed: " + e.getMessage());
         }
+    }
 
     private void writeData(Object requestData, HttpURLConnection connection) throws IOException {
         if (requestData != null) {
@@ -90,15 +104,17 @@ public class ServerFacade {
         }
     }
 
-    private <T> T readAnswer(HttpURLConnection connection, Class<T> responseClass) throws IOException {
-        if (responseClass != null && connection.getContentLength() < 0) {
-            InputStream inputStream = connection.getInputStream();
-            InputStreamReader streamReader = new InputStreamReader(inputStream);
-            return gson.fromJson(streamReader, responseClass);
+    private String readStream(InputStream stream) throws IOException {
+        if (stream == null) return "";
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(stream))) {
+            StringBuilder result = new StringBuilder();
+            String line;
+            while ((line = reader.readLine()) != null) {
+                result.append(line);
+            }
+            return result.toString();
         }
-        return null;
     }
-
     public String getSessionToken() { return sessionToken; }
 }
 
