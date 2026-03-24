@@ -104,6 +104,45 @@ public class ServerFacadeTests {
                 facade.listGames()
         );
     }
+    // lets join a game of chess
+    @Test
+    void joinGamePositive() throws Exception {
+        facade.register("Lane", "lane123", "lane@email.com");
+        int gameId = facade.createGame("JoinChess");
+        Assertions.assertDoesNotThrow(() -> facade.joinGame(gameId, "WHITE"));
+    }
+
+    @Test
+    void joinGameNegative() throws Exception {
+        facade.register("Emma", "emma123", "emma@email.com");
+        Assertions.assertThrows(Exception.class, () ->
+                facade.joinGame(9999, "WHITE") // invalid game id
+        );
+    }
+
+    // find that session token
+    @Test
+    void getAuthTokenPositive() throws Exception {
+        facade.register("Sarah", "sarah123", "sarah@email.com");
+        Assertions.assertNotNull(facade.getAuthToken());
+    }
+
+    @Test
+    void getAuthTokenNegative() {
+        Assertions.assertNull(facade.getAuthToken()); // before login
+    }
+
+    // what your name
+    @Test
+    void getUsernamePositive() throws Exception {
+        facade.register("Ellie", "ellie123", "ellie@email.com");
+        Assertions.assertEquals("Ellie", facade.getUsername());
+    }
+
+    @Test
+    void getUsernameNegative() {
+        Assertions.assertNull(facade.getUsername()); // before login
+    }
 
 
 
