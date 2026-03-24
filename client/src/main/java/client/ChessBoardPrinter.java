@@ -16,9 +16,8 @@ public class ChessBoardPrinter {
     private static final String homeColor = "\u001b[31m";
     private static final String awayColor = "\u001b[34m";
 
-
-    private static final String[] COL_LABELS_WHITE = {"a", "b", "c", "d", "e", "f", "g", "h"};
-    private static final String[] COL_LABELS_BLACK = {"h", "g", "f", "e", "d", "c", "b", "a"};
+    private static final String[] COL_LABELS_WHITE = {"a","b","c","d","e","f","g","h"};
+    private static final String[] COL_LABELS_BLACK = {"h","g","f","e","d","c","b","a"};
 
     public static void drawBoard(ChessGame game, String perspective) {
         var out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
@@ -59,33 +58,22 @@ public class ChessBoardPrinter {
     private static String buildRow(ChessBoard board, int row, int[] colOrder, boolean whiteView) {
         StringBuilder rowString = new StringBuilder();
         for (int col : colOrder) {
-
-            boolean findWhiteSquare = (row + col) % 2 != 0;
+            boolean findWhiteSquare = (row + col) % 2 == 0;
             String tileColor = findWhiteSquare ? whiteTile : blackTile;
-
+            boolean homeSide = whiteView ? row <= 2 : row >= 7;
+            String textColor = homeSide ? homeColor : awayColor;
             ChessPiece piece = board.getPiece(new ChessPosition(row, col));
-            String textColor = resetColor;
-            if (piece != null) {
-                if (piece.getTeamColor() == ChessGame.TeamColor.WHITE) {
-                    textColor = homeColor;
-                } else {
-                    textColor = awayColor;
-                }
-            }
-
-            String letter = getLetter(piece);
-
             rowString.append(tileColor)
                     .append(textColor)
                     .append(" ")
-                    .append(letter == null ? " " : letter)
+                    .append(getLetter(piece))
                     .append(" ")
                     .append(resetColor);
         }
         return rowString.toString();
     }
     private static String getLetter(ChessPiece piece) {
-        if (piece == null) return ".";
+        if (piece == null) return " ";
         return switch (piece.getPieceType()) {
             case KING   -> "K";
             case QUEEN  -> "Q";
