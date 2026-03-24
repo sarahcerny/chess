@@ -14,7 +14,6 @@ public class PreloginUI {
 
     public PreloginUI(ServerFacade serverFacade) {
         this.serverFacade = serverFacade;
-        this.serverAddress = serverFacade.getSessionToken();
         this.sessionToken = "";
         this.input = new Scanner(System.in);
     }
