@@ -12,15 +12,18 @@ public class ChessBoardPrinter {
 
     private static final int SQUARE_SIZE = 3;
 
+    //colors for the board glow up
     private static final String resetColor = "\u001b[0m";
-    private static final String whiteTile = "\u001b[47m"; // white squares
-    private static final String blackTile = "\u001b[40m"; // black squares
-    private static final String homeColor = "\u001b[31m";  // bottom of white perspective
-    private static final String awayColor = "\u001b[34m"; // bottom of black perspective / opponent side
+    private static final String whiteTile = "\u001b[47m";
+    private static final String blackTile = "\u001b[40m";
+    private static final String homeColor = "\u001b[31m";
+    private static final String awayColor = "\u001b[34m";
+
 
     private static final String[] COL_LABELS_WHITE = {"a","b","c","d","e","f","g","h"};
     private static final String[] COL_LABELS_BLACK = {"h","g","f","e","d","c","b","a"};
 
+    // draw them board
     public static void drawBoard(ChessGame game, String perspective) {
         var out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
         boolean whitePerspective = perspective.equalsIgnoreCase("white");
@@ -28,6 +31,7 @@ public class ChessBoardPrinter {
 
         printHeader(out, whitePerspective);
 
+        // looping through rows
         for (int row = 1; row <= 8; row++) {
             int displayRow = whitePerspective ? 9 - row : row;
             out.print(displayRow + " ");
@@ -51,6 +55,7 @@ public class ChessBoardPrinter {
         out.println(resetColor);
     }
 
+    // stay constant
     private static void printHeader(PrintStream out, boolean whitePerspective) {
         out.print("  ");
         String[] colLabels = whitePerspective ? COL_LABELS_WHITE : COL_LABELS_BLACK;
@@ -59,11 +64,12 @@ public class ChessBoardPrinter {
         }
         out.println();
     }
-    // print square
 
     private static void printSquare(PrintStream out, ChessPiece piece, boolean isWhiteSquare,
                                     int row, boolean whitePerspective) {
+        // Background check fr
         out.print(isWhiteSquare ? whiteTile : blackTile);
+
         String symbol = " ";
         if (piece != null) {
             switch (piece.getPieceType()) {
@@ -75,8 +81,11 @@ public class ChessBoardPrinter {
                 case PAWN -> symbol = "P";
             }
         }
+
+        // decide if it’s your squad or the opps
         boolean bottomSide = whitePerspective ? row >= 7 : row <= 2;
         String textColor = bottomSide ? homeColor : awayColor;
+
 
         out.print(textColor + " " + symbol + " " + resetColor);
     }
