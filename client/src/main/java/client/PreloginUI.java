@@ -59,10 +59,34 @@ public class PreloginUI {
             return handleError(e);
         }
     }
+    private String register(String[] args) {
+        if (args.length < 3) {
+            return SET_TEXT_COLOR_RED + "Missing arguments. Usage: register <USERNAME> <PASSWORD> <EMAIL>";
+        }
+        if (args.length > 3) {
+            return SET_TEXT_COLOR_RED + "Too many arguments. Usage: register <USERNAME> <PASSWORD> <EMAIL>";
+        }
+        try {
+            String username = args[0];
+            String password = args[1];
+            String email = args[2];
+            sessionToken = serverFacade.register(username, password, email);
+            System.out.println(SET_TEXT_COLOR_GREEN + "Registered and logged in! Welcome, " + username + "!");
+            new PostloginUI(serverFacade, input).run();
+            return SET_TEXT_COLOR_YELLOW + "Logged out. See you next time!";
+        } catch (Exception e) {
+            return handleError(e);
+        }
+    }
 
-
-
-
+    private String handleError(Exception e) {
+        String msg = e.getMessage();
+        if (msg != null) {
+            return SET_TEXT_COLOR_RED + "Error: " + msg;
+        }
+        return SET_TEXT_COLOR_RED + "Something went wrong. Please try again.";
+    }
+}
 
 
 }
