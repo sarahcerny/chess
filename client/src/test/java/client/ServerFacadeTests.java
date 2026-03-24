@@ -23,4 +23,28 @@ public class ServerFacadeTests {
         server.stop();
     }
 
+    @BeforeEach
+    void clearDatabase() throws Exception {
+        facade.clearDatabase();
+    }
+
+    // Register
+    @Test
+    void registerPositive() throws Exception {
+        String token = facade.register("Sarah", "sarah123", "sarah@email.com");
+        Assertions.assertNotNull(token);
+        Assertions.assertTrue(token.length() > 10);
+    }
+
+    @Test
+    void registerNegative() {
+        Assertions.assertThrows(Exception.class, () -> {
+            facade.register("Ellie", "ellie123", "ellie@email.com");
+            facade.register("Ellie", "ellie123", "ellie@email.com"); // duplicate
+        });
+    }
+
+    // login i guess
+
+
 }
