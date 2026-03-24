@@ -55,7 +55,10 @@ public class PreloginUI {
             new PostloginUI(serverFacade, input).start();
             return "Logged out. See you next time!";
         } catch (Exception e) {
-            return handleError(e);
+            if (e.getMessage().toLowerCase().contains("unauthorized")) {
+                return "Error: Login failed. Check your username and password.";
+            }
+            return "Error: " + e.getMessage();
         }
     }
 

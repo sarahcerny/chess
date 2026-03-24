@@ -20,7 +20,7 @@ public class PostloginUI {
     }
 
     public void start() {
-        System.out.println("\nWelcome to the Post-Login menu!");
+        System.out.println("Welcome to the Post-login menu!");
         printHelp();
 
         while (true) {
@@ -28,25 +28,19 @@ public class PostloginUI {
             String line = scanner.nextLine().trim();
             if (line.isEmpty()) continue;
 
-            var parts = line.split("\\s+"); // Split by any whitespace
+            String[] parts = line.split("\\s+");
             String command = parts[0].toLowerCase();
-            String[] params = Arrays.copyOfRange(parts, 1, parts.length);
+            // This gathers everything after the first word
+            String[] params = java.util.Arrays.copyOfRange(parts, 1, parts.length);
 
             switch (command) {
                 case "help" -> printHelp();
-                case "logout" -> {
-                    logout();
-                    return;
-                }
+                case "logout" -> { logout(); return; }
                 case "create" -> createGame(params);
                 case "list" -> listGames();
                 case "play" -> playGame(params);
                 case "observe" -> observeGame(params);
-                case "quit" -> {
-                    System.out.println("Exiting...");
-                    System.exit(0);
-                }
-                default -> System.out.println("Unknown command: " + command + ". Type 'help' for options.");
+                default -> System.out.println("Unknown command. Type 'help'.");
             }
         }
     }
@@ -62,13 +56,12 @@ public class PostloginUI {
 
     private void printHelp() {
         System.out.println("Available commands:");
-        System.out.println("  help         - show this help message");
-        System.out.println("  logout       - log out and return to prelogin menu");
-        System.out.println("  create game  - create a new game");
-        System.out.println("  list games   - list all existing games");
-        System.out.println("  play game    - join a game to play");
-        System.out.println("  observe game - observe a game (white perspective)");
-        System.out.println("  reset        - reset all games");
+        System.out.println("  create <NAME>  - create a new game");
+        System.out.println("  list           - list all games");
+        System.out.println("  play <ID> <COLOR> - join and play (e.g., play 1 WHITE)");
+        System.out.println("  observe <ID>   - watch a game");
+        System.out.println("  logout         - return to main menu");
+        System.out.println("  help           - show this menu");
     }
 
     private void logout() {
@@ -112,63 +105,84 @@ public class PostloginUI {
             }
             for (int i = 0; i < lastGames.size(); i++) {
                 GameData g = lastGames.get(i);
-                String players;
-                if (g.whiteUsername() == null && g.blackUsername() == null) {
-                    players = "No players yet";
-                } else {
-                    String white = g.whiteUsername() != null ? g.whiteUsername() : "open";
-                    String black = g.blackUsername() != null ? g.blackUsername() : "open";
-                    players = "White: " + white + ", Black: " + black;
-                }
-                System.out.printf("%d. %s (%s)%n", i + 1, g.gameName(), players);
+
+                String white = (g.whiteUsername() != null) ? g.whiteUsername() : "open";
+                String black = (g.blackUsername() != null) ? g.blackUsername() : "open";
+
+                System.out.printf("%d. %s (White: %s, Black: %s)%n",
+                        i + 1, g.gameName(), white, black);
             }
         } catch (Exception e) {
             printServerError(e);
         }
     }
 
-    private void playGame() {
+    private void playGame(String[] params) {
         if (lastGames == null || lastGames.isEmpty()) {
-            System.out.println("No games to play. Use 'list games' first.");
+            System.out.println("No games to play. Use 'list' first.");
             return;
         }
+
         try {
-            System.out.print("Enter game number to join: ");
-            int number = Integer.parseInt(scanner.nextLine().trim());
-            if (number < 1 || number > lastGames.size()) {
+            int index;
+            String color;
+
+            // Extract "play 11 WHITE"
+            if (params.length >= 2) {
+                index = Integer.parseInt(params[0]) - 1;
+                color = params[1].toUpperCase();
+            } else {
+                System.out.print("Enter game number: ");
+                index = Integer.parseInt(scanner.nextLine().trim()) - 1;
+                System.out.print("Enter color (WHITE/BLACK): ");
+                color = scanner.nextLine().trim().toUpperCase();
+            }
+
+            // Validate index
+            if (index < 0 || index >= lastGames.size()) {
                 System.out.println("Invalid game number.");
                 return;
             }
 
-            GameData gameData = lastGames.get(number - 1);
+            GameData gameData = lastGames.get(index);
 
-            System.out.print("Enter color (white/black): ");
-            String color = scanner.nextLine().trim().toLowerCase();
-            if (!color.equals("white") && !color.equals("black")) {
-                System.out.println("Invalid color. Choose 'white' or 'black'.");
-                return;
-            }
-
+            // Attempt to join via Facade
             facade.joinGame(gameData.gameID(), color);
-            System.out.println("Joined game '" + gameData.gameName() + "' as " + color + "!");
 
+            // If no exception was thrown, it worked!
+            System.out.println("Joined successfully!");
             ChessBoardPrinter.drawBoard(gameData.game(), color);
 
         } catch (NumberFormatException e) {
-            System.out.println("Invalid input: please enter a number");
+            System.out.println("Error: Game ID must be a number.");
         } catch (Exception e) {
-            printServerError(e);
+            // This will catch the "bad request" or "already taken" errors from the server
+            String msg = e.getMessage();
+            if (msg.contains("403")) {
+                System.out.println("Error: That color is already taken!");
+            } else if (msg.contains("400")) {
+                System.out.println("Error: Bad request (Check your color spelling).");
+            } else {
+                printServerError(e);
+            }
         }
     }
 
-    private void observeGame() {
+    private void observeGame(String[] params) {
         if (lastGames == null || lastGames.isEmpty()) {
-            System.out.println("No games to observe. Use 'list games' first.");
+            System.out.println("No games to observe. Use 'list' first.");
             return;
         }
+
         try {
-            System.out.print("Enter game number to observe: ");
-            int number = Integer.parseInt(scanner.nextLine().trim());
+            int number;
+            if (params.length > 0) {
+                number = Integer.parseInt(params[0]);
+            } else {
+                System.out.print("Enter game number to observe: ");
+                number = Integer.parseInt(scanner.nextLine().trim());
+            }
+
             if (number < 1 || number > lastGames.size()) {
                 System.out.println("Invalid game number.");
                 return;
@@ -179,7 +193,7 @@ public class PostloginUI {
             ChessBoardPrinter.drawBoard(gameData.game(), "white");
 
         } catch (NumberFormatException e) {
-            System.out.println("Invalid input: please enter a number");
+            System.out.println("Error: Please provide a valid number.");
         } catch (Exception e) {
             printServerError(e);
         }
@@ -188,9 +202,9 @@ public class PostloginUI {
     private void printServerError(Exception e) {
         String msg = e.getMessage();
         if (msg != null) {
-            System.out.println("Error: " + msg);
+            System.out.println(msg);
         } else {
-            System.out.println("Unknown error");
+            System.out.println("Error: An unknown error occurred.");
         }
     }
 }
