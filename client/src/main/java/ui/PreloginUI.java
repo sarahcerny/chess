@@ -42,21 +42,21 @@ public class PreloginUI {
 
     private String login(String[] args) {
         if (args.length < 2) {
-            return "Missing arguments. Usage: login <USERNAME> <PASSWORD>";
+            return "Usage: login <USERNAME> <PASSWORD>";
         }
         if (args.length > 2) {
-            return "Too many arguments. Usage: login <USERNAME> <PASSWORD>";
+            return "Usage: login <USERNAME> <PASSWORD>";
         }
         try {
             String username = args[0];
             String password = args[1];
             sessionToken = serverFacade.login(username, password);
-            System.out.println("Login successful! Welcome, " + username + "!");
+            System.out.println("Login successful " + username );
             new PostloginUI(serverFacade, input).start();
-            return "Logged out. See you next time!";
+            return "Logged out.";
         } catch (Exception e) {
             if (e.getMessage().toLowerCase().contains("unauthorized")) {
-                return "Error: Login failed. Check your username and password.";
+                return "Error: Login failed.";
             }
             return "Error: " + e.getMessage();
         }
@@ -64,19 +64,19 @@ public class PreloginUI {
 
     private String register(String[] args) {
         if (args.length < 3) {
-            return "Missing arguments. Usage: register <USERNAME> <PASSWORD> <EMAIL>";
+            return "Usage: register <USERNAME> <PASSWORD> <EMAIL>";
         }
         if (args.length > 3) {
-            return "Too many arguments. Usage: register <USERNAME> <PASSWORD> <EMAIL>";
+            return "Usage: register <USERNAME> <PASSWORD> <EMAIL>";
         }
         try {
             String username = args[0];
             String password = args[1];
             String email = args[2];
             sessionToken = serverFacade.register(username, password, email);
-            System.out.println("Registered and logged in! Welcome, " + username + "!");
+            System.out.println("Registered and logged in! " + username + "!");
             new PostloginUI(serverFacade, input).start();
-            return "Logged out. See you next time!";
+            return "Logged out.";
         } catch (Exception e) {
             return handleError(e);
         }
@@ -87,7 +87,7 @@ public class PreloginUI {
         if (msg != null) {
             return "Error: " + msg;
         }
-        return "Something went wrong. Please try again.";
+        return "Error something is wrong";
     }
 
     private String helpMenu() {
