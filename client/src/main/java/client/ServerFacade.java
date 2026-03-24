@@ -38,6 +38,27 @@ public class ServerFacade {
     }
     // let the games begin
 
+    public GameID createGame(String gameTitle) {
+        requireLogin();
+        return callServer("POST", "/game",
+                new GameData(0, null, null, gameTitle, null), GameID.class);
+    }
+
+    public ArrayList<GameData> listGames() {
+        requireLogin();
+        return callServer("GET", "/game", null, GamesList.class).games();
+    }
+
+    public void joinGame(int gameNumber, String teamColor) {
+        requireLogin();
+        callServer("PUT", "/game",
+                new ColorAndGame(ChessGame.TeamColor.valueOf(teamColor), gameNumber), null);
+    }
+
+    public void clearDatabase() {
+        callServer("DELETE", "/db", null, null);
+    }
+
 
 
 
