@@ -61,6 +61,52 @@ public class ServerFacadeTests {
     }
 
     // Logout now queen
+    @Test
+    void logoutPositive() throws Exception {
+        facade.register("Tyler", "tyler123", "tyler@email.com");
+        Assertions.assertDoesNotThrow(() -> facade.logout());
+    }
+
+    @Test
+    void logoutNegative() {
+        Assertions.assertThrows(Exception.class, () ->
+                facade.logout()
+        );
+    }
+
+    // lets create the game
+    @Test
+    void createGamePositive() throws Exception {
+        facade.register("Anna", "anna123", "anna@email.com");
+        Assertions.assertDoesNotThrow(() -> facade.createGame("ChessGame"));
+    }
+
+    @Test
+    void createGameNegative() {
+        Assertions.assertThrows(Exception.class, () ->
+                facade.createGame("ChessGame")
+        );
+    }
+
+    // now lets list the games.
+    @Test
+    void listGamesPositive() throws Exception {
+        facade.register("Jonas", "jonas123", "jonas@email.com");
+        facade.createGame("ChessGame1");
+        facade.createGame("ChessGame2");
+        List<GameData> games = facade.listGames();
+        Assertions.assertEquals(2, games.size());
+    }
+
+    @Test
+    void listGamesNegative() {
+        Assertions.assertThrows(Exception.class, () ->
+                facade.listGames()
+        );
+    }
+
+
+
 
 
 
