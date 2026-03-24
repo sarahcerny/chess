@@ -58,8 +58,28 @@ public class ServerFacade {
     public void clearDatabase() {
         callServer("DELETE", "/db", null, null);
     }
+    // help a sister out please
+
+        private void requireLogin() {
+            if (sessionToken == null) {
+                throw new RuntimeException("You must be logged in first.");
+            }
+        }
+
+        private <T> T callServer(String method, String endpoint, Object requestData, Class<T> responseClass) {
+            try {
+                HttpURLConnection connection = (HttpURLConnection)
+                        new URI(serverAddress + endpoint).toURL().openConnection();
+                connection.setRequestMethod(method);
+                connection.setDoOutput(true);
+                connection.setRequestProperty("authorization", sessionToken);
+                writeData(requestData, connection);
+                connection.connect();
+                connection.getResponseCode();
+                return readAnswer(connection, responseClass);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
 
 
-
-
-}
