@@ -69,12 +69,17 @@ public class ChessBoardPrinter {
         }
         return rowString.toString();
     }
-
-
-
-
-
-
+    private static String getLetter(ChessPiece piece) {
+        if (piece == null) return " ";
+        return switch (piece.getPieceType()) {
+            case KING   -> "K";
+            case QUEEN  -> "Q";
+            case ROOK   -> "R";
+            case BISHOP -> "B";
+            case KNIGHT -> "N";
+            case PAWN   -> "P";
+        };
+    }
 
 
 }
