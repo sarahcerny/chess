@@ -31,16 +31,16 @@ public class PostloginUI {
             var args = Arrays.copyOfRange(inputParts, 1, inputParts.length);
 
             String result = switch (holdInput) {
-                case "help" -> helpMenu();
-                case "logout" -> {
+                case "help"    -> helpMenu();
+                case "logout"  -> {
                     logout();
                     yield "logout";
                 }
-                case "create" -> makeGame(args);
-                case "list" -> getGames();
-                case "play" -> playChess(args);
+                case "create"  -> makeGame(args);
+                case "list"    -> getGames();
+                case "play"    -> playChess(args);
                 case "observe" -> viewGame(args);
-                case "quit" -> {
+                case "quit"    -> {
                     System.out.println(SET_TEXT_COLOR_RED + "Leaving chess. Goodbye!");
                     yield "quit";
                 }
@@ -71,4 +71,45 @@ public class PostloginUI {
             System.out.println(handleError(e));
         }
     }
+
+    private String makeGame(String[] args) {
+        if (args.length < 1) {
+            return SET_TEXT_COLOR_RED + "Missing game name. Usage: create <NAME>";
+        }
+        if (args.length > 1) {
+            return SET_TEXT_COLOR_RED + "Too many arguments. Usage: create <NAME>";
+        }
+        try {
+            String gameTitle = args[0];
+            serverFacade.createGame(gameTitle);
+            return SET_TEXT_COLOR_GREEN + "Game '" + gameTitle + "' created!";
+        } catch (Exception e) {
+            return handleError(e);
+        }
+    }
+
+    private String getGames() {
+        try {
+            gamesList = serverFacade.listGames();
+            gameMap.clear();
+            if (gamesList.isEmpty()) {
+                return SET_TEXT_COLOR_YELLOW + "No games available. Create one with 'create <NAME>'!";
+            }
+            StringBuilder display = new StringBuilder(SET_TEXT_COLOR_BLUE + "Current games:\n");
+            for (int i = 0; i < gamesList.size(); i++) {
+                GameData currentGame = gamesList.get(i);
+                gameMap.put(i + 1, currentGame);
+                display.append(String.format("  %d. %s | White: %s | Black: %s%n",
+                        i + 1,
+                        currentGame.gameName(),
+                        currentGame.whiteUsername() != null ? currentGame.whiteUsername() : "open",
+                        currentGame.blackUsername() != null ? currentGame.blackUsername() : "open"));
+            }
+            return display.toString();
+        } catch (Exception e) {
+            return handleError(e);
+        }
+    }
+
+
 }
