@@ -72,27 +72,13 @@ public class ServerFacade {
                     new URI(serverAddress + endpoint).toURL().openConnection();
             connection.setRequestMethod(method);
             connection.setDoOutput(true);
-            if (sessionToken != null) {
-                connection.setRequestProperty("authorization", sessionToken);
-            }
+            connection.setRequestProperty("authorization", sessionToken);
             writeData(requestData, connection);
             connection.connect();
-
-            int status = connection.getResponseCode();
-            if (status / 100 != 2) {
-                String errorBody = readStream(connection.getErrorStream());
-                var errorMap = gson.fromJson(errorBody, java.util.Map.class);
-                String message = (errorMap != null && errorMap.get("message") != null)
-                        ? (String) errorMap.get("message")
-                        : "Server error: " + status;
-                throw new RuntimeException(message);
-            }
-
+            connection.getResponseCode();
             return readAnswer(connection, responseClass);
-        } catch (RuntimeException e) {
-            throw e;
         } catch (Exception e) {
-            throw new RuntimeException("Connection failed: " + e.getMessage());
+            throw new RuntimeException(e);
         }
     }
 
@@ -104,16 +90,14 @@ public class ServerFacade {
         }
     }
 
-    private String readStream(InputStream stream) throws IOException {
-        if (stream == null) return "";
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(stream))) {
-            StringBuilder result = new StringBuilder();
-            String line;
-            while ((line = reader.readLine()) != null) {
-                result.append(line);
-            }
-            return result.toString();
+
+    private <T> T readAnswer(HttpURLConnection connection, Class<T> responseClass) throws IOException {
+        if (responseClass != null && connection.getContentLength() < 0) {
+            InputStream inputStream = connection.getInputStream();
+            InputStreamReader streamReader = new InputStreamReader(inputStream);
+            return gson.fromJson(streamReader, responseClass);
         }
+        return null;
     }
     public String getSessionToken() { return sessionToken; }
 }
