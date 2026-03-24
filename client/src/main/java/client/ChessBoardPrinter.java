@@ -36,3 +36,26 @@ public class ChessBoardPrinter {
         printHeader(out, colLabels);
         out.println(resetColor);
     }
+
+    private static int[] buildRowOrder(boolean whiteView) {
+        int[] rows = new int[8];
+        for (int i = 0; i < 8; i++) {
+            rows[i] = whiteView ? (8 - i) : (i + 1);
+        }
+        return rows;
+    }
+
+    private static int[] buildColOrder(boolean whiteView) {
+        int[] cols = new int[8];
+        for (int i = 0; i < 8; i++) {
+            cols[i] = whiteView ? (i + 1) : (8 - i);
+        }
+        return cols;
+    }
+
+
+
+
+}
+
+
