@@ -111,5 +111,38 @@ public class PostloginUI {
         }
     }
 
+    private String playChess(String[] args) {
+        if (args.length < 2) {
+            return SET_TEXT_COLOR_RED + "Missing arguments. Usage: play <NUM> <COLOR>";
+        }
+        if (args.length > 2) {
+            return SET_TEXT_COLOR_RED + "Too many arguments. Usage: play <NUM> <COLOR>";
+        }
+        if (gameMap.isEmpty()) {
+            return SET_TEXT_COLOR_RED + "No games loaded. Type 'list' first.";
+        }
+        try {
+            int gameNum = Integer.parseInt(args[0]);
+            String teamColor = args[1].toUpperCase();
+
+            if (!teamColor.equals("WHITE") && !teamColor.equals("BLACK")) {
+                return SET_TEXT_COLOR_RED + "Invalid color. Choose 'white' or 'black'.";
+            }
+            if (!gameMap.containsKey(gameNum)) {
+                return SET_TEXT_COLOR_RED + "Invalid game number. Type 'list' to see available games.";
+            }
+
+            GameData currentGame = gameMap.get(gameNum);
+            serverFacade.joinGame(currentGame.gameID(), teamColor);
+            System.out.println(SET_TEXT_COLOR_GREEN + "Joined '" + currentGame.gameName() + "' as " + teamColor + "!");
+            ChessBoardPrinter.drawBoard(currentGame.game(), teamColor);
+            return SET_TEXT_COLOR_YELLOW + "Returned to post-login menu.";
+        } catch (NumberFormatException e) {
+            return SET_TEXT_COLOR_RED + "Invalid game number. Please enter a number.";
+        } catch (Exception e) {
+            return handleError(e);
+        }
+    }
+
 
 }
