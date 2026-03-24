@@ -66,7 +66,9 @@ public class ChessBoardPrinter {
     }
 
     private static String getPieceSymbol(ChessPiece piece) {
-        if (piece == null) return " ";
+        if (piece == null) {
+            return " ";
+        }
         switch (piece.getPieceType()) {
             case KING: return "K";
             case QUEEN: return "Q";
