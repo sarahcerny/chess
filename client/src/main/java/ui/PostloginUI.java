@@ -1,10 +1,9 @@
 package ui;
 
 import client.ServerFacade;
-import client.ChessBoardPrinter;
 import model.GameData;
 
-import java.util.Arrays;
+
 import java.util.List;
 import java.util.Scanner;
 
@@ -30,7 +29,8 @@ public class PostloginUI {
 
             String[] parts = line.split("\\s+");
             String command = parts[0].toLowerCase();
-            // This gathers everything after the first word
+
+
             String[] params = java.util.Arrays.copyOfRange(parts, 1, parts.length);
 
             switch (command) {

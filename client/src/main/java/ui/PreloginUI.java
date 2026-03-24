@@ -90,15 +90,6 @@ public class PreloginUI {
         return "Something went wrong. Please try again.";
     }
 
-    public String getSessionToken() {
-        return sessionToken;
-    }
-
-    public boolean isLoggedIn() {
-        return !sessionToken.isEmpty();
-    }
-
-
     private String helpMenu() {
         return """
                 - register <USERNAME> <PASSWORD> <EMAIL> - to create an account
