@@ -4,93 +4,84 @@ import chess.ChessGame;
 import chess.ChessBoard;
 import chess.ChessPiece;
 import chess.ChessPosition;
+
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
 
 public class ChessBoardPrinter {
 
-    private static final int SQUARE_SIZE = 3;
-    private static final String resetColor = "\u001b[0m";
-    private static final String whiteTile = "\u001b[47m";
-    private static final String blackTile = "\u001b[40m";
-    private static final String homeColor = "\u001b[31m";
-    private static final String awayColor = "\u001b[34m";
+    private static final int SQUARE_WIDTH = 3;
 
-    private static final String[] COL_LABELS_WHITE = {"a","b","c","d","e","f","g","h"};
-    private static final String[] COL_LABELS_BLACK = {"h","g","f","e","d","c","b","a"};
+    private static final String RESET_COLOR = "\u001b[0m";
+    private static final String WHITE_BG = "\u001b[47m"; // white squares
+    private static final String BLACK_BG = "\u001b[40m"; // black squares
+    private static final String RED_TEXT = "\u001b[31m";  // bottom of white perspective
+    private static final String BLUE_TEXT = "\u001b[34m"; // bottom of black perspective / opponent side
 
     public static void drawBoard(ChessGame game, String perspective) {
         var out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
-        boolean whiteView = perspective.equalsIgnoreCase("white");
+        boolean whitePerspective = perspective.equalsIgnoreCase("white");
         ChessBoard board = game.getBoard();
 
-        String[] colLabels = whiteView ? COL_LABELS_WHITE : COL_LABELS_BLACK;
-        printHeader(out, colLabels);
+        printFiles(out, whitePerspective);
 
-        int[] rowOrder = buildRowOrder(whiteView);
-        int[] colOrder = buildColOrder(whiteView);
+        for (int row = 1; row <= 8; row++) {
+            int displayRow = whitePerspective ? 9 - row : row;
+            out.print(displayRow + " ");
 
-        for (int row : rowOrder) {
-            out.print(row + " ");
-            out.print(buildRow(board, row, colOrder, whiteView));
-            out.println(" " + row);
+            for (int col = 1; col <= 8; col++) {
+                int actualRow = whitePerspective ? row : 9 - row;
+                int actualCol = whitePerspective ? col : 9 - col;
+
+                ChessPosition pos = new ChessPosition(actualRow, actualCol);
+                ChessPiece piece = board.getPiece(pos);
+
+                boolean isWhiteSquare = (actualRow + actualCol) % 2 == 0;
+
+                printSquare(out, piece, isWhiteSquare, row, whitePerspective);
+            }
+
+            out.println(" " + displayRow);
         }
 
-        printHeader(out, colLabels);
-        out.println(resetColor);
+        printFiles(out, whitePerspective);
+        out.println();
     }
 
-    private static int[] buildRowOrder(boolean whiteView) {
-        int[] rows = new int[8];
-        for (int i = 0; i < 8; i++) {
-            rows[i] = whiteView ? (8 - i) : (i + 1);
-        }
-        return rows;
-    }
-
-    private static int[] buildColOrder(boolean whiteView) {
-        int[] cols = new int[8];
-        for (int i = 0; i < 8; i++) {
-            cols[i] = whiteView ? (i + 1) : (8 - i);
-        }
-        return cols;
-    }
-    private static String buildRow(ChessBoard board, int row, int[] colOrder, boolean whiteView) {
-        StringBuilder rowString = new StringBuilder();
-        for (int col : colOrder) {
-            boolean findWhiteSquare = (row + col) % 2 == 0;
-            String tileColor = findWhiteSquare ? whiteTile : blackTile;
-            boolean homeSide = whiteView ? row <= 2 : row >= 7;
-            String textColor = homeSide ? homeColor : awayColor;
-            ChessPiece piece = board.getPiece(new ChessPosition(row, col));
-            rowString.append(tileColor)
-                    .append(textColor)
-                    .append(" ")
-                    .append(getLetter(piece))
-                    .append(" ")
-                    .append(resetColor);
-        }
-        return rowString.toString();
-    }
-    private static String getLetter(ChessPiece piece) {
-        if (piece == null) return " ";
-        return switch (piece.getPieceType()) {
-            case KING   -> "K";
-            case QUEEN  -> "Q";
-            case ROOK   -> "R";
-            case BISHOP -> "B";
-            case KNIGHT -> "N";
-            case PAWN   -> "P";
-        };
-    }
-    private static void printHeader(PrintStream out, String[] colLabels) {
+    private static void printFiles(PrintStream out, boolean whitePerspective) {
         out.print("  ");
-        for (String label : colLabels) {
-            out.print(" " + label + " ");
+        if (whitePerspective) {
+            for (char file = 'a'; file <= 'h'; file++) {
+                out.print(" " + file + " ");
+            }
+        } else {
+            for (char file = 'h'; file >= 'a'; file--) {
+                out.print(" " + file + " ");
+            }
         }
         out.println();
     }
 
+    private static void printSquare(PrintStream out, ChessPiece piece, boolean isWhiteSquare,
+                                    int row, boolean whitePerspective) {
+
+        out.print(isWhiteSquare ? WHITE_BG : BLACK_BG);
+
+        String symbol = " ";
+        if (piece != null) {
+            switch (piece.getPieceType()) {
+                case KING -> symbol = "K";
+                case QUEEN -> symbol = "Q";
+                case ROOK -> symbol = "R";
+                case BISHOP -> symbol = "B";
+                case KNIGHT -> symbol = "N";
+                case PAWN -> symbol = "P";
+            }
+        }
+
+        boolean bottomSide = whitePerspective ? row >= 7 : row <= 2;
+        String textColor = bottomSide ? RED_TEXT : BLUE_TEXT;
+
+        out.print(textColor + " " + symbol + " " + RESET_COLOR);
+    }
 }
-
-
