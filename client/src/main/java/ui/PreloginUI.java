@@ -51,17 +51,13 @@ public class PreloginUI {
             String username = args[0];
             String password = args[1];
             sessionToken = serverFacade.login(username, password);
-            System.out.println("Login successful " + username );
+            System.out.println("Login successful " + username);
             new PostloginUI(serverFacade, input).start();
             return "Logged out.";
         } catch (Exception e) {
-            if (e.getMessage().toLowerCase().contains("unauthorized")) {
-                return "Error: Login failed.";
-            }
-            return "Error: " + e.getMessage();
+            return handleError(e);
         }
     }
-
     private String register(String[] args) {
         if (args.length < 3) {
             return "Usage: register <USERNAME> <PASSWORD> <EMAIL>";
@@ -84,10 +80,12 @@ public class PreloginUI {
 
     private String handleError(Exception e) {
         String msg = e.getMessage();
-        if (msg != null) {
-            return "Error: " + msg;
-        }
-        return "Error something is wrong";
+        if (msg == null) { return "Something went wrong. Please try again."; }
+        if (msg.contains("401")) { return "Incorrect username or password."; }
+        if (msg.contains("403")) { return "That username is already taken."; }
+        if (msg.contains("400")) { return "Please check your input."; }
+        if (msg.contains("500")) { return "Server error. Please try again."; }
+        return "Something went wrong. Please try again.";
     }
 
     private String helpMenu() {

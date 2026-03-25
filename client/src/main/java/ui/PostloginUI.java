@@ -110,65 +110,64 @@ public class PostloginUI {
     }
 
     private void playGame(String[] params) {
+        if (params.length < 2) {
+            System.out.println("Missing inputs Usage: play <NUM> <COLOR>");
+            return;
+        }
         if (lastGames == null || lastGames.isEmpty()) {
             System.out.println("Please run 'list' first.");
             return;
         }
-
         try {
             int index;
-            String color;
-
-            if (params.length >= 2) {
+            try {
                 index = Integer.parseInt(params[0]) - 1;
-                color = params[1].toUpperCase();
-            } else {
-                System.out.print("Enter game number: ");
-                index = Integer.parseInt(scanner.nextLine().trim()) - 1;
-                System.out.print("Enter color (WHITE/BLACK): ");
-                color = scanner.nextLine().trim().toUpperCase();
-            }
-
-            if (index < 0 || index >= lastGames.size()) {
-                System.out.println("Invalid game number.");
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid format. Usage: play <NUM> <COLOR>");
                 return;
             }
-
+            String color = params[1].toUpperCase();
+            if (!color.equals("WHITE") && !color.equals("BLACK")) {
+                System.out.println("Invalid color. Please enter WHITE or BLACK.");
+                return;
+            }
+            if (index < 0 || index >= lastGames.size()) {
+                System.out.println("Invalid game number type 'list' to see available games.");
+                return;
+            }
             model.GameData gameData = lastGames.get(index);
             facade.joinGame(gameData.gameID(), color);
-
             System.out.println("Joined successfully!");
             client.ChessBoardPrinter.drawBoard(gameData.game(), color);
-
         } catch (Exception e) {
             printServerError(e);
         }
     }
 
     private void observeGame(String[] params) {
+        if (params.length < 1) {
+            System.out.println("Missing inputs: observe <NUM>");
+            return;
+        }
         if (lastGames == null || lastGames.isEmpty()) {
             System.out.println("Please run 'list' first.");
             return;
         }
-
         try {
             int index;
-            if (params.length > 0) {
+            try {
                 index = Integer.parseInt(params[0]) - 1;
-            } else {
-                System.out.print("Enter game number to observe: ");
-                index = Integer.parseInt(scanner.nextLine().trim()) - 1;
-            }
-
-            if (index < 0 || index >= lastGames.size()) {
-                System.out.println("Invalid game number.");
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid game number Please enter a number.");
                 return;
             }
-
+            if (index < 0 || index >= lastGames.size()) {
+                System.out.println("Invalid game number type 'list' to see available games.");
+                return;
+            }
             model.GameData gameData = lastGames.get(index);
             System.out.println("Observing " + gameData.gameName() + ":");
             client.ChessBoardPrinter.drawBoard(gameData.game(), "WHITE");
-
         } catch (Exception e) {
             printServerError(e);
         }
@@ -176,10 +175,11 @@ public class PostloginUI {
 
     private void printServerError(Exception e) {
         String msg = e.getMessage();
-        if (msg != null) {
-            System.out.println(msg);
-        } else {
-            System.out.println("Error: An unknown error occurred.");
-        }
+        if (msg == null) { System.out.println("Something went wrong. Please try again."); return; }
+        if (msg.contains("403")) { System.out.println("That spot is already taken."); return; }
+        if (msg.contains("401")) { System.out.println("Incorrect username or password."); return; }
+        if (msg.contains("400")) { System.out.println("Please check your input."); return; }
+        if (msg.contains("500")) { System.out.println("Something went wrong. Please try again."); return; }
+        System.out.println("Something went wrong. Please try again.");
     }
 }
