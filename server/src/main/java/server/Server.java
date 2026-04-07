@@ -12,11 +12,14 @@ import service.UserService;
 import java.util.List;
 import java.util.Map;
 
+import dataaccess.*;
+
 public class Server {
-// server runs the whole system fr
+    // server runs the whole system fr
     private final Javalin myServer;
     private final UserService userService;
     private final GameService gameService;
+    private final WebSocketHandler wsHandler; // ← NEW
     //gson is going to convert json stuff
     private final Gson gsonMap = new Gson();
 
@@ -34,6 +37,7 @@ public class Server {
         }
         userService = new UserService(userDAO, authDAO);
         gameService = new GameService(userDAO, authDAO, gameDAO);
+        wsHandler = new WebSocketHandler(authDAO, gameDAO); // ← NEW
         // spin up javalin and plug in gson so it knows how to handle json when she comes ur way
         myServer = Javalin.create(config -> {
             config.staticFiles.add("web");
@@ -55,6 +59,11 @@ public class Server {
     }
     // all 7 endpoints live here so we got to keep it neat with the routes
     private void registerRoutes() {
+        myServer.ws("/ws", ws -> {          // ← NEW
+            ws.onConnect(wsHandler::onConnect);
+            ws.onMessage(wsHandler::onMessage);
+            ws.onClose(wsHandler::onClose);
+        });                                  // ← NEW
         myServer.delete("/db",      this::clear);
         myServer.post("/user",      this::register);
         myServer.post("/session",   this::login);
@@ -90,7 +99,6 @@ public class Server {
         String username = (String) requestBody.get("username");
         String password = (String) requestBody.get("password");
         String email    = (String) requestBody.get("email");
-
 
         // yay new player send back their token so they can do stuff
         var playerSession = userService.register(username, password, email);
