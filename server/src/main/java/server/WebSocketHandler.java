@@ -47,12 +47,40 @@ public class WebSocketHandler {
         try {
             UserGameCommand gameCommand = gson.fromJson(session.message(), UserGameCommand.class);
             switch (gameCommand.getCommandType()) {
-                case CONNECT  -> handleConnect(session, gameCommand);
+                case CONNECT -> handleConnect(session, gameCommand);
                 case MAKE_MOVE -> handleMakeMove(session, gson.fromJson(session.message(), MoveCommands.class));
-                case LEAVE    -> handleLeave(session, gameCommand);
-                case RESIGN   -> handleResign(session, gameCommand);
+                case LEAVE -> handleLeave(session, gameCommand);
+                case RESIGN -> handleResign(session, gameCommand);
             }
         } catch (Exception e) {
             notifyPlayer(session, new ErrorMessage("Error: " + e.getMessage()));
         }
+//connect them all
+        private void handleConnect(WsContext session, UserGameCommand gameCommand) throws DataAccessException {
+            String playerToken = gameCommand.getAuthToken();
+            int roomID = gameCommand.getGameID();
+
+            AuthData auth = authDAO.getAuth(playerToken);
+            if (auth == null) {
+                notifyPlayer(session, new ErrorMessage("Error: invalid auth token"));
+                return;
+            }
+
+            GameData activeGame = gameDAO.getGame(roomID);
+            if (activeGame == null) {
+                notifyPlayer(session, new ErrorMessage("Error: game not found"));
+                return;
+            }
+
+            // add session to the room bc yk
+            roomSessions.computeIfAbsent(roomID, k -> ConcurrentHashMap.newKeySet()).add(session.sessionId());
+
+            notifyPlayer(session, new GameMessages(activeGame.game()));
+
+            // notify everyone else in the room there here
+            String playerName = auth.username();
+            String role = getPlayerRole(playerName, activeGame);
+            sendAll(roomID, session.sessionId(), new NotificationMessage(playerName + " joined as " + role));
+        }
+
     }}
