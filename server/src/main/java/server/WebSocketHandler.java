@@ -137,4 +137,36 @@ public class WebSocketHandler {
         gameDAO.updateGame(new GameData(activeGame.gameID(), activeGame.whiteUsername(),
                 activeGame.blackUsername(), activeGame.gameName(), chessGame));
 
-    }}}
+    }
+
+    // send updated board spilling tea and lore to everyone
+    GameMessages updatedGame = new GameMessages(chessGame);
+    notifyPlayer(session, updatedGame);
+    sendAll(roomID, session.sessionId(), updatedGame);
+
+    String moveNote = playerName + " moved " + playerMove.getStartPosition() + " to " + playerMove.getEndPosition();
+    sendAll(roomID, session.sessionId(), new NotificationMessage(moveNote));
+
+    // check for checkmate or stalemate like old times
+    ChessGame.TeamColor opponent = playerColor == ChessGame.TeamColor.WHITE ?
+            ChessGame.TeamColor.BLACK : ChessGame.TeamColor.WHITE;
+
+        if (chessGame.isInCheckmate(opponent)) {
+        String msg = (opponent == ChessGame.TeamColor.WHITE ?
+                activeGame.whiteUsername() : activeGame.blackUsername()) + " is in checkmate!";
+        notifyPlayer(session, new NotificationMessage(msg));
+        sendAll(roomID, session.sessionId(), new NotificationMessage(msg));
+    } else if (chessGame.isInStalemate(opponent)) {
+        String msg = "Stalemate! The game is a draw.";
+        notifyPlayer(session, new NotificationMessage(msg));
+        sendAll(roomID, session.sessionId(), new NotificationMessage(msg));
+    } else if (chessGame.isInCheck(opponent)) {
+        String msg = (opponent == ChessGame.TeamColor.WHITE ?
+                activeGame.whiteUsername() : activeGame.blackUsername()) + " is in check!";
+        notifyPlayer(session, new NotificationMessage(msg));
+        sendAll(roomID, session.sessionId(), new NotificationMessage(msg));
+    }
+}
+}
+
+}
