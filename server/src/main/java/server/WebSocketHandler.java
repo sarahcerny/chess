@@ -47,71 +47,73 @@ public class WebSocketHandler {
         try {
             UserGameCommand gameCommand = gson.fromJson(session.message(), UserGameCommand.class);
             switch (gameCommand.getCommandType()) {
-                case CONNECT -> handleConnect(session, gameCommand);
+                case CONNECT  -> handleConnect(session, gameCommand);
                 case MAKE_MOVE -> handleMakeMove(session, gson.fromJson(session.message(), MoveCommands.class));
-                case LEAVE -> handleLeave(session, gameCommand);
-                case RESIGN -> handleResign(session, gameCommand);
+                case LEAVE    -> handleLeave(session, gameCommand);
+                case RESIGN   -> handleResign(session, gameCommand);
             }
         } catch (Exception e) {
             notifyPlayer(session, new ErrorMessage("Error: " + e.getMessage()));
         }
-//connect them all
-        private void handleConnect (WsContext session, UserGameCommand gameCommand) throws DataAccessException {
-            String playerToken = gameCommand.getAuthToken();
-            int roomID = gameCommand.getGameID();
+    }
+    //connect them all
+    private void handleConnect(WsContext session, UserGameCommand gameCommand) throws DataAccessException {
+        String playerToken = gameCommand.getAuthToken();
+        int roomID = gameCommand.getGameID();
 
-            AuthData auth = authDAO.getAuth(playerToken);
-            if (auth == null) {
-                notifyPlayer(session, new ErrorMessage("Error: invalid auth token"));
-                return;
-            }
-
-            GameData activeGame = gameDAO.getGame(roomID);
-            if (activeGame == null) {
-                notifyPlayer(session, new ErrorMessage("Error: game not found"));
-                return;
-            }
-
-            // add session to the room bc yk
-            roomSessions.computeIfAbsent(roomID, k -> ConcurrentHashMap.newKeySet()).add(session.sessionId());
-
-            notifyPlayer(session, new GameMessages(activeGame.game()));
-
-            // notify everyone else in the room there here
-            String playerName = auth.username();
-            String role = getPlayerRole(playerName, activeGame);
-            sendAll(roomID, session.sessionId(), new NotificationMessage(playerName + " joined as " + role));
+        AuthData auth = authDAO.getAuth(playerToken);
+        if (auth == null) {
+            notifyPlayer(session, new ErrorMessage("Error: invalid auth token"));
+            return;
         }
-        // what do you do when you want to make a room
-        private void handleMakeMove (WsContext session, MoveCommands gameCommand) throws DataAccessException {
-            String playerToken = gameCommand.getAuthToken();
-            int roomID = gameCommand.getGameID();
-            ChessMove playerMove = gameCommand.getPlayerMove();
 
-            AuthData auth = authDAO.getAuth(playerToken);
-            if (auth == null) {
-                notifyPlayer(session, new ErrorMessage("Error: invalid auth token"));
-                return;
-            }
-
-            GameData activeGame = gameDAO.getGame(roomID);
-            if (activeGame == null) {
-                notifyPlayer(session, new ErrorMessage("Error: game not found"));
-                return;
-            }
-
-            String playerName = auth.username();
-            ChessGame chessGame = activeGame.game();
-
-            // check game is not over yet bae
-            if (chessGame.isInCheckmate(ChessGame.TeamColor.WHITE) ||
-                    chessGame.isInCheckmate(ChessGame.TeamColor.BLACK) ||
-                    chessGame.isInStalemate(ChessGame.TeamColor.WHITE) ||
-                    chessGame.isInStalemate(ChessGame.TeamColor.BLACK)) {
-                notifyPlayer(session, new ErrorMessage("Error: game is already over"));
-                return;
-            }
+        GameData activeGame = gameDAO.getGame(roomID);
+        if (activeGame == null) {
+            notifyPlayer(session, new ErrorMessage("Error: game not found"));
+            return;
         }
+
+        // add session to the room bc yk
+        roomSessions.computeIfAbsent(roomID, k -> ConcurrentHashMap.newKeySet()).add(session.sessionId());
+
+        notifyPlayer(session, new GameMessages(activeGame.game()));
+
+        // notify everyone else in the room there here
+        String playerName = auth.username();
+        String role = getPlayerRole(playerName, activeGame);
+        sendAll(roomID, session.sessionId(), new NotificationMessage(playerName + " joined as " + role));
+    }
+
+    // what do you do when you want to make a room
+    private void handleMakeMove(WsContext session, MoveCommands gameCommand) throws DataAccessException {
+        String playerToken = gameCommand.getAuthToken();
+        int roomID = gameCommand.getGameID();
+        ChessMove playerMove = gameCommand.getPlayerMove();
+
+        AuthData auth = authDAO.getAuth(playerToken);
+        if (auth == null) {
+            notifyPlayer(session, new ErrorMessage("Error: invalid auth token"));
+            return;
+        }
+
+        GameData activeGame = gameDAO.getGame(roomID);
+        if (activeGame == null) {
+            notifyPlayer(session, new ErrorMessage("Error: game not found"));
+            return;
+        }
+
+        String playerName = auth.username();
+        ChessGame chessGame = activeGame.game();
+
+        // check game is not over yet bae
+        if (chessGame.isInCheckmate(ChessGame.TeamColor.WHITE) ||
+                chessGame.isInCheckmate(ChessGame.TeamColor.BLACK) ||
+                chessGame.isInStalemate(ChessGame.TeamColor.WHITE) ||
+                chessGame.isInStalemate(ChessGame.TeamColor.BLACK)) {
+            notifyPlayer(session, new ErrorMessage("Error: game is already over"));
+            return;
+        }
+
         // make sure player is actually in the game for reals
         boolean isWhite = playerName.equals(activeGame.whiteUsername());
         boolean isBlack = playerName.equals(activeGame.blackUsername());
@@ -137,35 +139,35 @@ public class WebSocketHandler {
         gameDAO.updateGame(new GameData(activeGame.gameID(), activeGame.whiteUsername(),
                 activeGame.blackUsername(), activeGame.gameName(), chessGame));
 
-    }
+        // send updated board spilling tea and lore to everyone
+        GameMessages updatedGame = new GameMessages(chessGame);
+        notifyPlayer(session, updatedGame);
+        sendAll(roomID, session.sessionId(), updatedGame);
 
-    // send updated board spilling tea and lore to everyone
-    GameMessages updatedGame = new GameMessages(chessGame);
-    notifyPlayer(session, updatedGame);
-    sendAll(roomID, session.sessionId(), updatedGame);
+        String moveNote = playerName + " moved " + playerMove.getStartPosition() + " to " + playerMove.getEndPosition();
+        sendAll(roomID, session.sessionId(), new NotificationMessage(moveNote));
 
-    String moveNote = playerName + " moved " + playerMove.getStartPosition() + " to " + playerMove.getEndPosition();
-    sendAll(roomID, session.sessionId(), new NotificationMessage(moveNote));
-
-    // check for checkmate or stalemate like old times
-    ChessGame.TeamColor opponent = playerColor == ChessGame.TeamColor.WHITE ?
-            ChessGame.TeamColor.BLACK : ChessGame.TeamColor.WHITE;
+        // check for checkmate or stalemate like old times
+        ChessGame.TeamColor opponent = playerColor == ChessGame.TeamColor.WHITE ?
+                ChessGame.TeamColor.BLACK : ChessGame.TeamColor.WHITE;
 
         if (chessGame.isInCheckmate(opponent)) {
-        String msg = (opponent == ChessGame.TeamColor.WHITE ?
-                activeGame.whiteUsername() : activeGame.blackUsername()) + " is in checkmate!";
-        notifyPlayer(session, new NotificationMessage(msg));
-        sendAll(roomID, session.sessionId(), new NotificationMessage(msg));
-    } else if (chessGame.isInStalemate(opponent)) {
-        String msg = "Stalemate! The game is a draw.";
-        notifyPlayer(session, new NotificationMessage(msg));
-        sendAll(roomID, session.sessionId(), new NotificationMessage(msg));
-    } else if (chessGame.isInCheck(opponent)) {
-        String msg = (opponent == ChessGame.TeamColor.WHITE ?
-                activeGame.whiteUsername() : activeGame.blackUsername()) + " is in check!";
-        notifyPlayer(session, new NotificationMessage(msg));
-        sendAll(roomID, session.sessionId(), new NotificationMessage(msg));
+            String msg = (opponent == ChessGame.TeamColor.WHITE ?
+                    activeGame.whiteUsername() : activeGame.blackUsername()) + " is in checkmate!";
+            notifyPlayer(session, new NotificationMessage(msg));
+            sendAll(roomID, session.sessionId(), new NotificationMessage(msg));
+        } else if (chessGame.isInStalemate(opponent)) {
+            String msg = "Stalemate! The game is a draw.";
+            notifyPlayer(session, new NotificationMessage(msg));
+            sendAll(roomID, session.sessionId(), new NotificationMessage(msg));
+        } else if (chessGame.isInCheck(opponent)) {
+            String msg = (opponent == ChessGame.TeamColor.WHITE ?
+                    activeGame.whiteUsername() : activeGame.blackUsername()) + " is in check!";
+            notifyPlayer(session, new NotificationMessage(msg));
+            sendAll(roomID, session.sessionId(), new NotificationMessage(msg));
+        }
     }
+
     // now we need to handle leaving
     private void handleLeave(WsContext session, UserGameCommand gameCommand) throws DataAccessException {
         String playerToken = gameCommand.getAuthToken();
@@ -201,6 +203,7 @@ public class WebSocketHandler {
 
         sendAll(roomID, session.sessionId(), new NotificationMessage(playerName + " left the game."));
     }
+
     // now we got to handle resign
     private void handleResign(WsContext session, UserGameCommand gameCommand) throws DataAccessException {
         String playerToken = gameCommand.getAuthToken();
@@ -237,6 +240,7 @@ public class WebSocketHandler {
             notifyPlayer(session, new ErrorMessage("Error: game is already over"));
             return;
         }
+
         // a whole lot is going on here
         ChessGame.TeamColor resignColor = playerName.equals(activeGame.whiteUsername()) ?
                 ChessGame.TeamColor.WHITE : ChessGame.TeamColor.BLACK;
@@ -252,11 +256,28 @@ public class WebSocketHandler {
         sendAll(roomID, session.sessionId(), new NotificationMessage(msg));
     }
 
+    // now we need help
+    private void sendAll(int roomID, String excludeSessionId, Object message) {
+        Set<String> room = roomSessions.get(roomID);
+        if (room == null) { return; }
+        String json = gson.toJson(message);
+        for (String sid : room) {
+            if (!sid.equals(excludeSessionId)) {
+                WsContext ctx = playerSessions.get(sid);
+                if (ctx != null) {
+                    ctx.send(json);
+                }
+            }
+        }
+    }
 
+    private void notifyPlayer(WsContext session, Object message) {
+        session.send(gson.toJson(message));
+    }
 
-
-
-}
-}
-
+    private String getPlayerRole(String playerName, GameData activeGame) {
+        if (playerName.equals(activeGame.whiteUsername())) { return "WHITE"; }
+        if (playerName.equals(activeGame.blackUsername())) { return "BLACK"; }
+        return "an observer";
+    }
 }
