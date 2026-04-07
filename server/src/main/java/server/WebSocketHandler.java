@@ -237,6 +237,20 @@ public class WebSocketHandler {
             notifyPlayer(session, new ErrorMessage("Error: game is already over"));
             return;
         }
+        // a whole lot is going on here
+        ChessGame.TeamColor resignColor = playerName.equals(activeGame.whiteUsername()) ?
+                ChessGame.TeamColor.WHITE : ChessGame.TeamColor.BLACK;
+        chessGame.setTeamTurn(resignColor == ChessGame.TeamColor.WHITE ?
+                ChessGame.TeamColor.BLACK : ChessGame.TeamColor.WHITE);
+
+        // a whole lot is going on here
+        gameDAO.updateGame(new GameData(activeGame.gameID(), activeGame.whiteUsername(),
+                activeGame.blackUsername(), activeGame.gameName(), chessGame));
+
+        String msg = playerName + " resigned. Game over!";
+        notifyPlayer(session, new NotificationMessage(msg));
+        sendAll(roomID, session.sessionId(), new NotificationMessage(msg));
+    }
 
 
 
