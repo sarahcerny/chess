@@ -56,7 +56,7 @@ public class WebSocketHandler {
             notifyPlayer(session, new ErrorMessage("Error: " + e.getMessage()));
         }
 //connect them all
-        private void handleConnect(WsContext session, UserGameCommand gameCommand) throws DataAccessException {
+        private void handleConnect (WsContext session, UserGameCommand gameCommand) throws DataAccessException {
             String playerToken = gameCommand.getAuthToken();
             int roomID = gameCommand.getGameID();
 
@@ -83,7 +83,7 @@ public class WebSocketHandler {
             sendAll(roomID, session.sessionId(), new NotificationMessage(playerName + " joined as " + role));
         }
         // what do you do when you want to make a room
-        private void handleMakeMove(WsContext session, MoveCommands gameCommand) throws DataAccessException {
+        private void handleMakeMove (WsContext session, MoveCommands gameCommand) throws DataAccessException {
             String playerToken = gameCommand.getAuthToken();
             int roomID = gameCommand.getGameID();
             ChessMove playerMove = gameCommand.getPlayerMove();
@@ -111,6 +111,30 @@ public class WebSocketHandler {
                 notifyPlayer(session, new ErrorMessage("Error: game is already over"));
                 return;
             }
+        }
+        // make sure player is actually in the game for reals
+        boolean isWhite = playerName.equals(activeGame.whiteUsername());
+        boolean isBlack = playerName.equals(activeGame.blackUsername());
+        if (!isWhite && !isBlack) {
+            notifyPlayer(session, new ErrorMessage("Error: observers cannot make moves"));
+            return;
+        }
 
+        // hold up whoes turn is it
+        ChessGame.TeamColor playerColor = isWhite ? ChessGame.TeamColor.WHITE : ChessGame.TeamColor.BLACK;
+        if (chessGame.getTeamTurn() != playerColor) {
+            notifyPlayer(session, new ErrorMessage("Error: it is not your turn"));
+            return;
+        }
 
-    }}
+        try {
+            chessGame.makeMove(playerMove);
+        } catch (chess.InvalidMoveException e) {
+            notifyPlayer(session, new ErrorMessage("Error: invalid move"));
+            return;
+        }
+
+        gameDAO.updateGame(new GameData(activeGame.gameID(), activeGame.whiteUsername(),
+                activeGame.blackUsername(), activeGame.gameName(), chessGame));
+
+    }}}
