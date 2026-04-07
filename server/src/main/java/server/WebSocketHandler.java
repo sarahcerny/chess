@@ -166,6 +166,43 @@ public class WebSocketHandler {
         notifyPlayer(session, new NotificationMessage(msg));
         sendAll(roomID, session.sessionId(), new NotificationMessage(msg));
     }
+    // now we need to handle leaving
+    private void handleLeave(WsContext session, UserGameCommand gameCommand) throws DataAccessException {
+        String playerToken = gameCommand.getAuthToken();
+        int roomID = gameCommand.getGameID();
+
+        AuthData auth = authDAO.getAuth(playerToken);
+        if (auth == null) {
+            notifyPlayer(session, new ErrorMessage("Error: invalid auth token"));
+            return;
+        }
+
+        GameData activeGame = gameDAO.getGame(roomID);
+        if (activeGame == null) {
+            notifyPlayer(session, new ErrorMessage("Error: game not found"));
+            return;
+        }
+
+        String playerName = auth.username();
+
+        // remove player because they were once playing
+        if (playerName.equals(activeGame.whiteUsername())) {
+            gameDAO.updateGame(new GameData(activeGame.gameID(), null,
+                    activeGame.blackUsername(), activeGame.gameName(), activeGame.game()));
+        } else if (playerName.equals(activeGame.blackUsername())) {
+            gameDAO.updateGame(new GameData(activeGame.gameID(), activeGame.whiteUsername(),
+                    null, activeGame.gameName(), activeGame.game()));
+        }
+
+        Set<String> room = roomSessions.get(roomID);
+        if (room != null) {
+            room.remove(session.sessionId());
+        }
+
+        sendAll(roomID, session.sessionId(), new NotificationMessage(playerName + " left the game."));
+    }
+
+
 }
 }
 
