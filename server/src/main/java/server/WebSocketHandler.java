@@ -82,5 +82,35 @@ public class WebSocketHandler {
             String role = getPlayerRole(playerName, activeGame);
             sendAll(roomID, session.sessionId(), new NotificationMessage(playerName + " joined as " + role));
         }
+        // what do you do when you want to make a room
+        private void handleMakeMove(WsContext session, MoveCommands gameCommand) throws DataAccessException {
+            String playerToken = gameCommand.getAuthToken();
+            int roomID = gameCommand.getGameID();
+            ChessMove playerMove = gameCommand.getPlayerMove();
+
+            AuthData auth = authDAO.getAuth(playerToken);
+            if (auth == null) {
+                notifyPlayer(session, new ErrorMessage("Error: invalid auth token"));
+                return;
+            }
+
+            GameData activeGame = gameDAO.getGame(roomID);
+            if (activeGame == null) {
+                notifyPlayer(session, new ErrorMessage("Error: game not found"));
+                return;
+            }
+
+            String playerName = auth.username();
+            ChessGame chessGame = activeGame.game();
+
+            // check game is not over yet bae
+            if (chessGame.isInCheckmate(ChessGame.TeamColor.WHITE) ||
+                    chessGame.isInCheckmate(ChessGame.TeamColor.BLACK) ||
+                    chessGame.isInStalemate(ChessGame.TeamColor.WHITE) ||
+                    chessGame.isInStalemate(ChessGame.TeamColor.BLACK)) {
+                notifyPlayer(session, new ErrorMessage("Error: game is already over"));
+                return;
+            }
+
 
     }}
