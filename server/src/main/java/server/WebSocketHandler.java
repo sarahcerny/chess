@@ -201,6 +201,45 @@ public class WebSocketHandler {
 
         sendAll(roomID, session.sessionId(), new NotificationMessage(playerName + " left the game."));
     }
+    // now we got to handle resign
+    private void handleResign(WsContext session, UserGameCommand gameCommand) throws DataAccessException {
+        String playerToken = gameCommand.getAuthToken();
+        int roomID = gameCommand.getGameID();
+
+        AuthData auth = authDAO.getAuth(playerToken);
+        if (auth == null) {
+            notifyPlayer(session, new ErrorMessage("Error: invalid auth token"));
+            return;
+        }
+
+        GameData activeGame = gameDAO.getGame(roomID);
+        if (activeGame == null) {
+            notifyPlayer(session, new ErrorMessage("Error: game not found"));
+            return;
+        }
+
+        String playerName = auth.username();
+
+        // if you aint player you aint playing
+        boolean isPlayer = playerName.equals(activeGame.whiteUsername()) ||
+                playerName.equals(activeGame.blackUsername());
+        if (!isPlayer) {
+            notifyPlayer(session, new ErrorMessage("Error: observers cannot resign"));
+            return;
+        }
+
+        // is it game over fr
+        ChessGame chessGame = activeGame.game();
+        if (chessGame.isInCheckmate(ChessGame.TeamColor.WHITE) ||
+                chessGame.isInCheckmate(ChessGame.TeamColor.BLACK) ||
+                chessGame.isInStalemate(ChessGame.TeamColor.WHITE) ||
+                chessGame.isInStalemate(ChessGame.TeamColor.BLACK)) {
+            notifyPlayer(session, new ErrorMessage("Error: game is already over"));
+            return;
+        }
+
+
+
 
 
 }
