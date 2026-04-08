@@ -90,6 +90,7 @@ public class Server {
     // makes it fresh clean start of day type beat
     private void clear(Context ctx) throws DataAccessException {
         gameService.clear();
+        wsHandler.clearResignedGames();
         ctx.status(200).json(Map.of());
     }
 

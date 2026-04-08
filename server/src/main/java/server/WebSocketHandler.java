@@ -263,6 +263,10 @@ public class WebSocketHandler {
         sendAll(roomID, session.sessionId(), new NotificationMessage(msg));
     }
 
+    public void clearResignedGames() {
+        resignedGames.clear();
+    }
+
     // now we need help
     private void sendAll(int roomID, String excludeSessionId, Object message) {
         Set<String> room = roomSessions.get(roomID);
