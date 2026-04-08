@@ -76,7 +76,7 @@ public class ServerFacade {
         callServer("DELETE", "/db", null, null);
     }
 
-
+    public String getServerUrl() { return serverAddress; }
     private void requireLogin() {
         if (sessionToken == null) {
             throw new RuntimeException("You must be logged in first.");
