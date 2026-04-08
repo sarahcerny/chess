@@ -29,6 +29,8 @@ public class WebSocketHandler {
     // tracks which sessions belong to which game room which i need
     private final Map<Integer, Set<String>> roomSessions = new ConcurrentHashMap<>();
 
+    private final Set<Integer> resignedGames = ConcurrentHashMap.newKeySet();
+
     public WebSocketHandler(AuthDAO authDAO, GameDAO gameDAO) {
         this.authDAO = authDAO;
         this.gameDAO = gameDAO;
@@ -106,13 +108,12 @@ public class WebSocketHandler {
         ChessGame chessGame = activeGame.game();
 
         // check game is not over yet bae
-        if (chessGame.isInCheckmate(ChessGame.TeamColor.WHITE) ||
+        // check game is not over yet bae
+        if (resignedGames.contains(roomID) ||
+                chessGame.isInCheckmate(ChessGame.TeamColor.WHITE) ||
                 chessGame.isInCheckmate(ChessGame.TeamColor.BLACK) ||
                 chessGame.isInStalemate(ChessGame.TeamColor.WHITE) ||
                 chessGame.isInStalemate(ChessGame.TeamColor.BLACK)) {
-            notifyPlayer(session, new ErrorMessage("Error: game is already over"));
-            return;
-        }
 
         // make sure player is actually in the game for reals
         boolean isWhite = playerName.equals(activeGame.whiteUsername());
@@ -233,7 +234,8 @@ public class WebSocketHandler {
 
         // is it game over fr
         ChessGame chessGame = activeGame.game();
-        if (chessGame.isInCheckmate(ChessGame.TeamColor.WHITE) ||
+        if (resignedGames.contains(roomID) ||
+                chessGame.isInCheckmate(ChessGame.TeamColor.WHITE) ||
                 chessGame.isInCheckmate(ChessGame.TeamColor.BLACK) ||
                 chessGame.isInStalemate(ChessGame.TeamColor.WHITE) ||
                 chessGame.isInStalemate(ChessGame.TeamColor.BLACK)) {
@@ -248,6 +250,7 @@ public class WebSocketHandler {
                 ChessGame.TeamColor.BLACK : ChessGame.TeamColor.WHITE);
 
         // a whole lot is going on here
+        resignedGames.add(roomID);
         gameDAO.updateGame(new GameData(activeGame.gameID(), activeGame.whiteUsername(),
                 activeGame.blackUsername(), activeGame.gameName(), chessGame));
 
