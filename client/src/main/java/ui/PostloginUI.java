@@ -50,7 +50,7 @@ public class PostloginUI {
         System.out.println("Available commands:");
         System.out.println("  create <NAME>  - create a new game");
         System.out.println("  list           - list all games");
-        System.out.println("  play <ID> <COLOR> - join and play (e.g., play 1 WHITE)");
+        System.out.println("  play <ID> <COLOR> - join and play");
         System.out.println("  observe <ID>   - watch a game");
         System.out.println("  logout         - return to main menu");
         System.out.println("  help           - show this menu");
@@ -138,7 +138,14 @@ public class PostloginUI {
             model.GameData gameData = lastGames.get(index);
             facade.joinGame(gameData.gameID(), color);
             System.out.println("Joined successfully!");
-            client.ChessBoardPrinter.drawBoard(gameData.game(), color);
+            chess.ChessGame.TeamColor teamColor = color.equals("WHITE") ?
+                    chess.ChessGame.TeamColor.WHITE : chess.ChessGame.TeamColor.BLACK;
+            try {
+                GameplayUI gameplay = new GameplayUI(facade.getServerUrl(), facade.getAuthToken(), gameData.gameID(), teamColor);
+                gameplay.start();
+            } catch (Exception ex) {
+                System.out.println("Failed to connect to game: " + ex.getMessage());
+            }
         } catch (Exception e) {
             printServerError(e);
         }
