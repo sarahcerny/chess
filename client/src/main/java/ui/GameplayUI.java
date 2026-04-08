@@ -15,8 +15,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Scanner;
 
-import static ui.EscapeSequences.*;
-
 @ClientEndpoint
 public class GameplayUI {
 
@@ -42,7 +40,7 @@ public class GameplayUI {
     @OnOpen
     public void onOpen(Session session) {
         this.gameSocket = session;
-        UserGameCommand connectCmd = new UserGameCommand(UserGameCommand.CommandType.CONNECT, playerToken, roomID);
+        UserGameCommand connectCmd = new UserGameCommand(UserGameCommand.CommandType.CONNECT, playerToken, roomID, null);
         sendMessage(gson.toJson(connectCmd));
     }
 
@@ -58,12 +56,12 @@ public class GameplayUI {
             }
             case NOTIFICATION -> {
                 NotificationMessage note = gson.fromJson(message, NotificationMessage.class);
-                System.out.println(SET_TEXT_COLOR_BLUE + "\n" + note.getMessage());
+                System.out.println(note.getMessage());
                 printPrompt();
             }
             case ERROR -> {
                 ErrorMessage err = gson.fromJson(message, ErrorMessage.class);
-                System.out.println(SET_TEXT_COLOR_RED + "\n" + err.getErrorMessage());
+                System.out.println("Error: " + err.getErrorMessage());
                 printPrompt();
             }
         }
@@ -71,7 +69,7 @@ public class GameplayUI {
 
     @OnError
     public void onError(Session session, Throwable throwable) {
-        System.out.println(SET_TEXT_COLOR_RED + "WebSocket error: " + throwable.getMessage());
+        System.out.println("WebSocket error: " + throwable.getMessage());
     }
 
     public void start() {
@@ -95,19 +93,19 @@ public class GameplayUI {
             case "resign" -> resign();
             case "leave" -> leave();
             case "highlight" -> highlightMoves(args);
-            default -> System.out.println(SET_TEXT_COLOR_RED + "Unknown command. Type 'help' for options.");
+            default -> System.out.println("Unknown command. Type 'help' for options.");
         }
     }
 
     private void makeMove(String[] args) {
         if (args.length < 2) {
-            System.out.println(SET_TEXT_COLOR_RED + "Usage: move <from> <to>  (e.g. move e2 e4)");
+            System.out.println("Usage: move <from> <to>  (e.g. move e2 e4)");
             return;
         }
         ChessPosition from = parsePosition(args[0]);
         ChessPosition to = parsePosition(args[1]);
         if (from == null || to == null) {
-            System.out.println(SET_TEXT_COLOR_RED + "Invalid position. Use format like e2 or a1.");
+            System.out.println("Invalid position. Use format like e2 or a1.");
             return;
         }
         ChessMove playerMove = new ChessMove(from, to, null);
@@ -116,21 +114,23 @@ public class GameplayUI {
     }
 
     private void resign() {
-        System.out.print(SET_TEXT_COLOR_YELLOW + "Are you sure you want to resign? (yes/no): ");
+        System.out.print("Are you sure you want to resign? (yes/no): ");
         String confirm = userInput.nextLine().trim().toLowerCase();
         if (confirm.equals("yes")) {
-            UserGameCommand resignCmd = new UserGameCommand(UserGameCommand.CommandType.CONNECT, playerToken, roomID);
+            UserGameCommand resignCmd = new UserGameCommand(
+                    UserGameCommand.CommandType.RESIGN, playerToken, roomID, null);
             sendMessage(gson.toJson(resignCmd));
         } else {
-            System.out.println(SET_TEXT_COLOR_GREEN + "Resign cancelled.");
+            System.out.println("Resign cancelled.");
         }
     }
 
     private void leave() {
-        UserGameCommand leaveCmd = new UserGameCommand(UserGameCommand.CommandType.CONNECT, playerToken, roomID);
+        UserGameCommand leaveCmd = new UserGameCommand(
+                UserGameCommand.CommandType.LEAVE, playerToken, roomID, null);
         sendMessage(gson.toJson(leaveCmd));
         inGame = false;
-        System.out.println(SET_TEXT_COLOR_YELLOW + "You left the game.");
+        System.out.println("You left the game.");
         try {
             if (gameSocket != null && gameSocket.isOpen()) {
                 gameSocket.close();
@@ -142,25 +142,24 @@ public class GameplayUI {
 
     private void highlightMoves(String[] args) {
         if (args.length < 1) {
-            System.out.println( "Usage: highlight <position>  (e.g. highlight e2)");
+            System.out.println("Usage: highlight <position>  (e.g. highlight e2)");
             return;
         }
         if (gameState == null) {
-            System.out.println( "No game loaded yet.");
+            System.out.println("No game loaded yet.");
             return;
         }
         ChessPosition pos = parsePosition(args[0]);
         if (pos == null) {
-            System.out.println( "Invalid position.");
+            System.out.println("Invalid position.");
             return;
         }
         Collection<ChessMove> moves = gameState.validMoves(pos);
         if (moves == null || moves.isEmpty()) {
-            System.out.println( "No legal moves for that piece.");
+            System.out.println("No legal moves for that piece.");
             return;
         }
         client.ChessBoardPrinter.drawBoard(gameState, playerColor.name());
-        System.out.println("(Highlighting not supported yet)");
     }
 
     private void printBoard() {
@@ -174,12 +173,12 @@ public class GameplayUI {
     private void helpMenu() {
         System.out.println(
                 "Commands:\n" +
-                "  move <from> <to>     - make a move (e.g. move e2 e4)\n" +
-                "  highlight <pos>      - show legal moves for a piece\n" +
-                "  redraw               - redraw the board\n" +
-                "  resign               - forfeit the game\n" +
-                "  leave                - leave the game\n" +
-                "  help                 - show this menu");
+                        "  move <from> <to>  - make a move (e.g. move e2 e4)\n" +
+                        "  highlight <pos>   - show legal moves for a piece\n" +
+                        "  redraw            - redraw the board\n" +
+                        "  resign            - forfeit the game\n" +
+                        "  leave             - leave the game\n" +
+                        "  help              - show this menu");
     }
 
     private void printPrompt() {
