@@ -108,12 +108,16 @@ public class WebSocketHandler {
         ChessGame chessGame = activeGame.game();
 
         // check game is not over yet bae
-        // check game is not over yet bae
         if (resignedGames.contains(roomID) ||
                 chessGame.isInCheckmate(ChessGame.TeamColor.WHITE) ||
                 chessGame.isInCheckmate(ChessGame.TeamColor.BLACK) ||
                 chessGame.isInStalemate(ChessGame.TeamColor.WHITE) ||
                 chessGame.isInStalemate(ChessGame.TeamColor.BLACK)) {
+            notifyPlayer(session, new ErrorMessage("Error: game is already over"));
+            return;
+        }
+
+// make sure player is actually in the game for reals
 
         // make sure player is actually in the game for reals
         boolean isWhite = playerName.equals(activeGame.whiteUsername());
