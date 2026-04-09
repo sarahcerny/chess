@@ -127,9 +127,13 @@ public class GameplayUI implements MessageHandler {
             System.out.println("No game loaded yet.");
             return;
         }
-        chess.ChessGame tempGame = new chess.ChessGame();
-        tempGame.setBoard(gameState.getBoard());
-        client.ChessBoardPrinter.drawBoard(tempGame, playerColor.name());
+        ChessPosition pos = parsePosition(args[0]);
+        if (pos == null) {
+            System.out.println("Invalid position. Use format like e2 or a1.");
+            return;
+        }
+        Collection<ChessMove> moves = gameState.validMoves(pos);
+        client.ChessBoardPrinter.drawBoard(gameState, playerColor.name(), pos, moves);
     }
 
     private void printBoard() {
