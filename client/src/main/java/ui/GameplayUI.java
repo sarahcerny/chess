@@ -9,17 +9,14 @@ import websocket.messages.GameMessages;
 import websocket.messages.NotificationMessage;
 import websocket.messages.ServerMessage;
 
-import jakarta.websocket.*;
-import java.net.URI;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Scanner;
 
-@ClientEndpoint
-public class GameplayUI {
+public class GameplayUI implements MessageHandler {
 
-    private Session gameSocket;
-    private ChessGame gameState;
+    private WebSocketFacade gameSocket;
+    private ChessBoard gameState;
     private final Scanner userInput = new Scanner(System.in);
     private final ChessGame.TeamColor playerColor;
     private final int roomID;
@@ -31,45 +28,32 @@ public class GameplayUI {
         this.playerToken = playerToken;
         this.roomID = roomID;
         this.playerColor = playerColor;
-
-        String wsUrl = serverUrl.replace("http", "ws") + "/ws";
-        WebSocketContainer container = ContainerProvider.getWebSocketContainer();
-        container.connectToServer(this, new URI(wsUrl));
+        this.gameSocket = new WebSocketFacade(serverUrl, this, playerToken, roomID);
+        // send connect command
+        UserGameCommand connectCmd = new UserGameCommand(
+                UserGameCommand.CommandType.CONNECT, playerToken, roomID);
+        gameSocket.sendMessage(gson.toJson(connectCmd));
     }
 
-    @OnOpen
-    public void onOpen(Session session) {
-        this.gameSocket = session;
-        UserGameCommand connectCmd = new UserGameCommand(UserGameCommand.CommandType.CONNECT, playerToken, roomID);
-        sendMessage(gson.toJson(connectCmd));
-    }
-
-    @OnMessage
-    public void onMessage(String message) {
-        ServerMessage serverMsg = gson.fromJson(message, ServerMessage.class);
-        switch (serverMsg.getServerMessageType()) {
+    @Override
+    public void notify(ServerMessage message) {
+        switch (message.getServerMessageType()) {
             case LOAD_GAME -> {
-                GameMessages gameMsg = gson.fromJson(message, GameMessages.class);
-                gameState = gameMsg.getGame();
+                gameState = message.getGame();  // getGame() returns ChessBoard
                 printBoard();
                 printPrompt();
             }
             case NOTIFICATION -> {
-                NotificationMessage note = gson.fromJson(message, NotificationMessage.class);
-                System.out.println(note.getMessage());
+                NotificationMessage note = gson.fromJson(gson.toJson(message), NotificationMessage.class);
+                System.out.println("\n" + note.getMessage());
                 printPrompt();
             }
             case ERROR -> {
-                ErrorMessage err = gson.fromJson(message, ErrorMessage.class);
-                System.out.println("Error: " + err.getErrorMessage());
+                ErrorMessage err = gson.fromJson(gson.toJson(message), ErrorMessage.class);
+                System.out.println("\nError: " + err.getErrorMessage());
                 printPrompt();
             }
         }
-    }
-
-    @OnError
-    public void onError(Session session, Throwable throwable) {
-        System.out.println("WebSocket error: " + throwable.getMessage());
     }
 
     public void start() {
@@ -110,7 +94,7 @@ public class GameplayUI {
         }
         ChessMove playerMove = new ChessMove(from, to, null);
         MoveCommands moveCmd = new MoveCommands(playerToken, roomID, playerMove);
-        sendMessage(gson.toJson(moveCmd));
+        gameSocket.sendMessage(gson.toJson(moveCmd));
     }
 
     private void resign() {
@@ -119,7 +103,7 @@ public class GameplayUI {
         if (confirm.equals("yes")) {
             UserGameCommand resignCmd = new UserGameCommand(
                     UserGameCommand.CommandType.RESIGN, playerToken, roomID);
-            sendMessage(gson.toJson(resignCmd));
+            gameSocket.sendMessage(gson.toJson(resignCmd));
         } else {
             System.out.println("Resign cancelled.");
         }
@@ -128,16 +112,9 @@ public class GameplayUI {
     private void leave() {
         UserGameCommand leaveCmd = new UserGameCommand(
                 UserGameCommand.CommandType.LEAVE, playerToken, roomID);
-        sendMessage(gson.toJson(leaveCmd));
+        gameSocket.sendMessage(gson.toJson(leaveCmd));
         inGame = false;
         System.out.println("You left the game.");
-        try {
-            if (gameSocket != null && gameSocket.isOpen()) {
-                gameSocket.close();
-            }
-        } catch (Exception e) {
-            // its fine
-        }
     }
 
     private void highlightMoves(String[] args) {
@@ -183,14 +160,6 @@ public class GameplayUI {
 
     private void printPrompt() {
         System.out.print("\n[IN GAME] >>> ");
-    }
-
-    private void sendMessage(String msg) {
-        try {
-            gameSocket.getBasicRemote().sendText(msg);
-        } catch (Exception e) {
-            System.out.println("Failed to send message: " + e.getMessage());
-        }
     }
 
     private ChessPosition parsePosition(String input) {
