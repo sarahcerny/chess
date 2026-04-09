@@ -134,6 +134,8 @@ public class WebSocketHandler {
             notifyPlayer(session, new ErrorMessage("Error: it is not your turn"));
             return;
         }
+        // check if there is a piece being captured
+        ChessPiece capturedPiece = chessGame.getBoard().getPiece(playerMove.getEndPosition());
 
         try {
             chessGame.makeMove(playerMove);
@@ -151,6 +153,18 @@ public class WebSocketHandler {
 
         gameDAO.updateGame(new GameData(activeGame.gameID(), activeGame.whiteUsername(),
                 activeGame.blackUsername(), activeGame.gameName(), chessGame));
+
+        // notify about capture if one happened
+        if (capturedPiece != null) {
+            String cols = "abcdefgh";
+            String captureSquare = "" + cols.charAt(playerMove.getEndPosition().getColumn() - 1)
+                    + playerMove.getEndPosition().getRow();
+            String capturedColor = capturedPiece.getTeamColor() == ChessGame.TeamColor.WHITE ? "white" : "black";
+            String capturedName = capturedPiece.getPieceType().toString().toLowerCase();
+            String captureMsg = playerName + " captured " + capturedColor + " " + capturedName + " at " + captureSquare + "!";
+            notifyPlayer(session, new NotificationMessage(captureMsg));
+            sendAll(roomID, session.sessionId(), new NotificationMessage(captureMsg));
+        }
 
         // send updated board spilling tea and lore to everyone
         GameMessages updatedGame = new GameMessages(chessGame);
