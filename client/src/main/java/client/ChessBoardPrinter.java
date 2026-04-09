@@ -1,28 +1,40 @@
 package client;
 
-import chess.ChessGame;
-import chess.ChessBoard;
-import chess.ChessPiece;
-import chess.ChessPosition;
+import chess.*;
 
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
 public class ChessBoardPrinter {
 
-    private static final String RESET_COLOR = "\u001b[0m";
-    private static final String WHITE_TILE = "\u001b[47m";
-    private static final String BLACK_TILE = "\u001b[40m";
-    private static final String HOME_COLOR = "\u001b[31m";
-    private static final String AWAY_COLOR = "\u001b[34m";
+    private static final String RESET_COLOR  = "\u001b[0m";
+    private static final String WHITE_TILE   = "\u001b[47m";
+    private static final String BLACK_TILE   = "\u001b[40m";
+    private static final String GREEN_TILE   = "\u001b[42m";
+    private static final String YELLOW_TILE  = "\u001b[43m";
+    private static final String HOME_COLOR   = "\u001b[97m";  // was \u001b[31m - now bright white for white pieces
+    private static final String AWAY_COLOR   = "\u001b[34m";  // blue for black pieces
 
     private static final String[] FILES_WHITE = {"a","b","c","d","e","f","g","h"};
     private static final String[] FILES_BLACK = {"h","g","f","e","d","c","b","a"};
 
     public static void drawBoard(ChessGame game, String perspective) {
+        drawBoard(game, perspective, null, null);
+    }
+
+    public static void drawBoard(ChessGame game, String perspective,
+                                 ChessPosition selected, Collection<ChessMove> legalMoves) {
         PrintStream out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
         boolean isWhiteView = perspective.equalsIgnoreCase("white");
         ChessBoard board = game.getBoard();
+
+        Set<ChessPosition> highlights = new HashSet<>();
+        if (legalMoves != null) {
+            for (ChessMove m : legalMoves) { highlights.add(m.getEndPosition()); }
+        }
 
         renderFiles(out, isWhiteView);
 
@@ -34,10 +46,14 @@ public class ChessBoardPrinter {
                 int actualRow = isWhiteView ? r + 1 : 8 - r;
                 int actualCol = isWhiteView ? c + 1 : 8 - c;
 
-                ChessPiece piece = board.getPiece(new ChessPosition(actualRow, actualCol));
+                ChessPosition pos = new ChessPosition(actualRow, actualCol);
+                ChessPiece piece = board.getPiece(pos);
                 boolean isWhiteSquare = (actualRow + actualCol) % 2 == 0;
 
-                drawSquare(out, piece, isWhiteSquare, r + 1, isWhiteView);
+                boolean isSelected  = selected != null && pos.equals(selected);
+                boolean isHighlight = highlights.contains(pos);
+
+                drawSquare(out, piece, isWhiteSquare, isSelected, isHighlight);
             }
 
             out.println(" " + displayRow);
@@ -57,12 +73,20 @@ public class ChessBoardPrinter {
     }
 
     private static void drawSquare(PrintStream out, ChessPiece piece, boolean whiteSquare,
-                                   int row, boolean isWhiteView) {
-        out.print(whiteSquare ? WHITE_TILE : BLACK_TILE);
+                                   boolean isSelected, boolean isHighlight) {
+        String bg;
+        if      (isSelected)  bg = YELLOW_TILE;
+        else if (isHighlight) bg = GREEN_TILE;
+        else                  bg = whiteSquare ? WHITE_TILE : BLACK_TILE;
+
+        out.print(bg);
+
+        // fix: use actual team color instead of guessing by row
+        String color = (piece != null && piece.getTeamColor() == ChessGame.TeamColor.WHITE)
+                ? HOME_COLOR : AWAY_COLOR;
+
         String symbol = getPieceSymbol(piece);
-        boolean bottomSide = isWhiteView ? row >= 7 : row <= 2;
-        String color = bottomSide ? HOME_COLOR : AWAY_COLOR;
-        { out.print(color + " " + symbol + " " + RESET_COLOR); }
+        out.print(color + " " + symbol + " " + RESET_COLOR);
     }
 
     private static String getPieceSymbol(ChessPiece piece) {
@@ -70,12 +94,12 @@ public class ChessBoardPrinter {
             return " ";
         }
         switch (piece.getPieceType()) {
-            case KING: return "K";
-            case QUEEN: return "Q";
-            case ROOK: return "R";
+            case KING:   return "K";
+            case QUEEN:  return "Q";
+            case ROOK:   return "R";
             case BISHOP: return "B";
             case KNIGHT: return "N";
-            case PAWN: return "P";
+            case PAWN:   return "P";
         }
         return " ";
     }
