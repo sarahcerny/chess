@@ -39,7 +39,8 @@ public class GameplayUI implements MessageHandler {
     public void notify(ServerMessage message) {
         switch (message.getServerMessageType()) {
             case LOAD_GAME -> {
-                gameState = message.getGame();  // getGame() returns ChessBoard
+                GameMessages gameMsg = gson.fromJson(gson.toJson(message), GameMessages.class);
+                gameState = gameMsg.getGame().getBoard();
                 printBoard();
                 printPrompt();
             }
@@ -126,17 +127,9 @@ public class GameplayUI implements MessageHandler {
             System.out.println("No game loaded yet.");
             return;
         }
-        ChessPosition pos = parsePosition(args[0]);
-        if (pos == null) {
-            System.out.println("Invalid position.");
-            return;
-        }
-        Collection<ChessMove> moves = gameState.validMoves(pos);
-        if (moves == null || moves.isEmpty()) {
-            System.out.println("No legal moves for that piece.");
-            return;
-        }
-        client.ChessBoardPrinter.drawBoard(gameState, playerColor.name());
+        chess.ChessGame tempGame = new chess.ChessGame();
+        tempGame.setBoard(gameState);
+        client.ChessBoardPrinter.drawBoard(tempGame, playerColor.name());
     }
 
     private void printBoard() {
@@ -144,7 +137,9 @@ public class GameplayUI implements MessageHandler {
             System.out.println("No game loaded yet.");
             return;
         }
-        client.ChessBoardPrinter.drawBoard(gameState, playerColor.name());
+        chess.ChessGame tempGame = new chess.ChessGame();
+        tempGame.setBoard(gameState);
+        client.ChessBoardPrinter.drawBoard(tempGame, playerColor.name());
     }
 
     private void helpMenu() {
