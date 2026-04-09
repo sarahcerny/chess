@@ -16,7 +16,7 @@ import java.util.Scanner;
 public class GameplayUI implements MessageHandler {
 
     private WebSocketFacade gameSocket;
-    private ChessBoard gameState;
+    private ChessGame gameState;
     private final Scanner userInput = new Scanner(System.in);
     private final ChessGame.TeamColor playerColor;
     private final int roomID;
@@ -39,8 +39,8 @@ public class GameplayUI implements MessageHandler {
     public void notify(ServerMessage message) {
         switch (message.getServerMessageType()) {
             case LOAD_GAME -> {
-                GameMessages gameMsg = gson.fromJson(gson.toJson(message), GameMessages.class);
-                gameState = gameMsg.getGame().getBoard();
+                GameMessages gm = gson.fromJson(gson.toJson(message), GameMessages.class);
+                gameState = gm.getGame();
                 printBoard();
                 printPrompt();
             }
@@ -128,7 +128,7 @@ public class GameplayUI implements MessageHandler {
             return;
         }
         chess.ChessGame tempGame = new chess.ChessGame();
-        tempGame.setBoard(gameState);
+        tempGame.setBoard(gameState.getBoard());
         client.ChessBoardPrinter.drawBoard(tempGame, playerColor.name());
     }
 
@@ -138,7 +138,7 @@ public class GameplayUI implements MessageHandler {
             return;
         }
         chess.ChessGame tempGame = new chess.ChessGame();
-        tempGame.setBoard(gameState);
+        tempGame.setBoard(gameState.getBoard());
         client.ChessBoardPrinter.drawBoard(tempGame, playerColor.name());
     }
 
