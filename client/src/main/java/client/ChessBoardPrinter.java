@@ -13,7 +13,8 @@ public class ChessBoardPrinter {
     private static final String RESET_COLOR  = "\u001b[0m";
     private static final String WHITE_TILE   = "\u001b[48;5;255m";;
     private static final String BLACK_TILE   = "\u001b[40m";
-    private static final String GREEN_TILE   = "\u001b[48;5;64m";;
+    private static final String GREEN_LIGHT = "\u001b[48;5;114m";
+    private static final String GREEN_DARK  = "\u001b[48;5;64m";
     private static final String YELLOW_TILE  = "\u001b[43m";
     private static final String HOME_COLOR   = "\u001b[31m";
     private static final String AWAY_COLOR   = "\u001b[34m";
@@ -75,15 +76,21 @@ public class ChessBoardPrinter {
     private static void drawSquare(PrintStream out, ChessPiece piece, boolean whiteSquare,
                                    boolean isSelected, boolean isHighlight) {
         String bg;
-        if      (isSelected)  bg = YELLOW_TILE;
-        else if (isHighlight) bg = GREEN_TILE;
-        else                  bg = whiteSquare ? WHITE_TILE : BLACK_TILE;
+        if (isSelected) {
+            bg = YELLOW_TILE;
+        } else if (isHighlight) {
+            bg = whiteSquare ? GREEN_LIGHT : GREEN_DARK;  // different shade per square color
+        } else {
+            bg = whiteSquare ? WHITE_TILE : BLACK_TILE;
+        }
 
         out.print(bg);
 
         String color;
         if (isSelected) {
-            color = "\u001b[97m"; // white text on yellow
+            color = "\u001b[30m"; // black text on yellow
+        } else if (isHighlight) {
+            color = "\u001b[30m"; // black text on green
         } else {
             color = (piece != null && piece.getTeamColor() == ChessGame.TeamColor.WHITE)
                     ? HOME_COLOR : AWAY_COLOR;
