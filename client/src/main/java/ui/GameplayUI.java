@@ -40,7 +40,7 @@ public class GameplayUI {
     @OnOpen
     public void onOpen(Session session) {
         this.gameSocket = session;
-        UserGameCommand connectCmd = new UserGameCommand(UserGameCommand.CommandType.CONNECT, playerToken, roomID, null);
+        UserGameCommand connectCmd = new UserGameCommand(UserGameCommand.CommandType.CONNECT, playerToken, roomID);
         sendMessage(gson.toJson(connectCmd));
     }
 
@@ -118,7 +118,7 @@ public class GameplayUI {
         String confirm = userInput.nextLine().trim().toLowerCase();
         if (confirm.equals("yes")) {
             UserGameCommand resignCmd = new UserGameCommand(
-                    UserGameCommand.CommandType.RESIGN, playerToken, roomID, null);
+                    UserGameCommand.CommandType.RESIGN, playerToken, roomID);
             sendMessage(gson.toJson(resignCmd));
         } else {
             System.out.println("Resign cancelled.");
@@ -127,7 +127,7 @@ public class GameplayUI {
 
     private void leave() {
         UserGameCommand leaveCmd = new UserGameCommand(
-                UserGameCommand.CommandType.LEAVE, playerToken, roomID, null);
+                UserGameCommand.CommandType.LEAVE, playerToken, roomID);
         sendMessage(gson.toJson(leaveCmd));
         inGame = false;
         System.out.println("You left the game.");
