@@ -41,6 +41,7 @@ public class GameplayUI implements MessageHandler {
             case LOAD_GAME -> {
                 GameMessages gm = gson.fromJson(gson.toJson(message), GameMessages.class);
                 gameState = gm.getGame();
+                System.out.println();
                 printBoard();
                 printPrompt();
             }
