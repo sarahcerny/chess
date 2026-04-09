@@ -52,7 +52,7 @@ public class GameplayUI implements MessageHandler {
             }
             case ERROR -> {
                 ErrorMessage err = gson.fromJson(gson.toJson(message), ErrorMessage.class);
-                System.out.println("\nError: " + err.getErrorMessage());
+                System.out.println("\n" + err.getErrorMessage());
                 printPrompt();
             }
         }
@@ -85,7 +85,7 @@ public class GameplayUI implements MessageHandler {
 
     private void makeMove(String[] args) {
         if (args.length < 2) {
-            System.out.println("Usage: move <from> <to>  (e.g. move e2 e4)");
+            System.out.println("Usage: move <from> <to> [promotion]  (e.g. move d7 d8 q)");
             return;
         }
         ChessPosition from = parsePosition(args[0]);
@@ -94,7 +94,24 @@ public class GameplayUI implements MessageHandler {
             System.out.println("Invalid position. Use format like e2 or a1.");
             return;
         }
-        ChessMove playerMove = new ChessMove(from, to, null);
+
+        ChessPiece.PieceType promotion = null;
+        if (promotion == null) {
+            int targetRow = to.getRow();
+            if (targetRow == 8 || targetRow == 1) {
+                System.out.print("Promote to (q/r/b/n): ");
+                String choice = userInput.nextLine().trim().toLowerCase();
+                promotion = switch (choice) {
+                    case "q" -> ChessPiece.PieceType.QUEEN;
+                    case "r" -> ChessPiece.PieceType.ROOK;
+                    case "b" -> ChessPiece.PieceType.BISHOP;
+                    case "n" -> ChessPiece.PieceType.KNIGHT;
+                    default -> ChessPiece.PieceType.QUEEN;
+                };
+            }
+        }
+
+        ChessMove playerMove = new ChessMove(from, to, promotion);
         MoveCommands moveCmd = new MoveCommands(playerToken, roomID, playerMove);
         gameSocket.sendMessage(gson.toJson(moveCmd));
     }
@@ -142,9 +159,9 @@ public class GameplayUI implements MessageHandler {
             System.out.println("No game loaded yet.");
             return;
         }
-        chess.ChessGame tempGame = new chess.ChessGame();
-        tempGame.setBoard(gameState.getBoard());
-        client.ChessBoardPrinter.drawBoard(tempGame, playerColor.name());
+        client.ChessBoardPrinter.drawBoard(gameState, playerColor.name());
+        String turn = gameState.getTeamTurn() == ChessGame.TeamColor.WHITE ? "White's turn" : "Black's turn";
+        System.out.println(turn);
     }
 
     private void helpMenu() {
