@@ -15,8 +15,8 @@ public class ChessBoardPrinter {
     private static final String BLACK_TILE   = "\u001b[40m";
     private static final String GREEN_TILE   = "\u001b[42m";
     private static final String YELLOW_TILE  = "\u001b[43m";
-    private static final String HOME_COLOR   = "\u001b[97m";  // was \u001b[31m - now bright white for white pieces
-    private static final String AWAY_COLOR   = "\u001b[34m";  // blue for black pieces
+    private static final String HOME_COLOR   = "\u001b[31m";
+    private static final String AWAY_COLOR   = "\u001b[34m";
 
     private static final String[] FILES_WHITE = {"a","b","c","d","e","f","g","h"};
     private static final String[] FILES_BLACK = {"h","g","f","e","d","c","b","a"};
