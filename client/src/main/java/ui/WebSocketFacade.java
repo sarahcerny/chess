@@ -28,3 +28,17 @@ public class WebSocketFacade extends Endpoint {
             }
         });
     }
+
+    @Override
+    public void onOpen(Session session, EndpointConfig config) {
+        this.session = session;
+    }
+
+    public void sendMessage(String msg) {
+        try {
+            session.getBasicRemote().sendText(msg);
+        } catch (Exception e) {
+            System.out.println("Failed to send: " + e.getMessage());
+        }
+    }
+}
