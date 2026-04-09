@@ -11,9 +11,9 @@ import java.util.Set;
 public class ChessBoardPrinter {
 
     private static final String RESET_COLOR  = "\u001b[0m";
-    private static final String WHITE_TILE   = "\u001b[47m";
+    private static final String WHITE_TILE   = "\u001b[48;5;255m";;
     private static final String BLACK_TILE   = "\u001b[40m";
-    private static final String GREEN_TILE   = "\u001b[42m";
+    private static final String GREEN_TILE   = "\u001b[48;5;64m";;
     private static final String YELLOW_TILE  = "\u001b[43m";
     private static final String HOME_COLOR   = "\u001b[31m";
     private static final String AWAY_COLOR   = "\u001b[34m";
@@ -43,7 +43,7 @@ public class ChessBoardPrinter {
             out.print(displayRow + " ");
 
             for (int c = 0; c < 8; c++) {
-                int actualRow = isWhiteView ? r + 1 : 8 - r;
+                int actualRow = isWhiteView ? 8 - r : r + 1;
                 int actualCol = isWhiteView ? c + 1 : 8 - c;
 
                 ChessPosition pos = new ChessPosition(actualRow, actualCol);
@@ -81,9 +81,13 @@ public class ChessBoardPrinter {
 
         out.print(bg);
 
-        // fix: use actual team color instead of guessing by row
-        String color = (piece != null && piece.getTeamColor() == ChessGame.TeamColor.WHITE)
-                ? HOME_COLOR : AWAY_COLOR;
+        String color;
+        if (isSelected) {
+            color = "\u001b[97m"; // white text on yellow
+        } else {
+            color = (piece != null && piece.getTeamColor() == ChessGame.TeamColor.WHITE)
+                    ? HOME_COLOR : AWAY_COLOR;
+        }
 
         String symbol = getPieceSymbol(piece);
         out.print(color + " " + symbol + " " + RESET_COLOR);
