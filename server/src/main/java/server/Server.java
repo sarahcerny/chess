@@ -37,10 +37,16 @@ public class Server {
         }
         userService = new UserService(userDAO, authDAO);
         gameService = new GameService(userDAO, authDAO, gameDAO);
-        wsHandler = new WebSocketHandler(authDAO, gameDAO); // ← NEW
-        // spin up javalin and plug in gson so it knows how to handle json when she comes ur way
+        wsHandler = new WebSocketHandler(authDAO, gameDAO);
+
+
         myServer = Javalin.create(config -> {
             config.staticFiles.add("web");
+
+            config.jetty.modifyWebSocketServletFactory(factory -> {
+                factory.setIdleTimeout(java.time.Duration.ofMinutes(60));
+            });
+
             Gson mapper = new Gson();
             config.jsonMapper(new JsonMapper() {
                 @Override
