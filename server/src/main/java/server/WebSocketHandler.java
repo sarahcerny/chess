@@ -2,6 +2,7 @@ package server;
 
 import chess.ChessGame;
 import chess.ChessMove;
+import chess.ChessPiece;
 import com.google.gson.Gson;
 import dataaccess.*;
 import io.javalin.websocket.WsContext;
@@ -137,7 +138,14 @@ public class WebSocketHandler {
         try {
             chessGame.makeMove(playerMove);
         } catch (chess.InvalidMoveException e) {
-            notifyPlayer(session, new ErrorMessage("Error: invalid move"));
+            ChessPiece piece = chessGame.getBoard().getPiece(playerMove.getStartPosition());
+            String pieceName = piece != null ? piece.getPieceType().toString().toLowerCase() : "piece";
+            String cols = "abcdefgh";
+            String from = "" + cols.charAt(playerMove.getStartPosition().getColumn() - 1)
+                    + playerMove.getStartPosition().getRow();
+            String to   = "" + cols.charAt(playerMove.getEndPosition().getColumn() - 1)
+                    + playerMove.getEndPosition().getRow();
+            notifyPlayer(session, new ErrorMessage("Error: " + pieceName + " cannot move from " + from + " to " + to));
             return;
         }
 
