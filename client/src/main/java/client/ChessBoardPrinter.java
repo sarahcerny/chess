@@ -88,9 +88,9 @@ public class ChessBoardPrinter {
 
         String color;
         if (isSelected) {
-            color = "\u001b[30m"; // black text on yellow
+            color = "\u001b[97m";
         } else if (isHighlight) {
-            color = "\u001b[30m"; // black text on green
+            color = "\u001b[30m";
         } else {
             color = (piece != null && piece.getTeamColor() == ChessGame.TeamColor.WHITE)
                     ? HOME_COLOR : AWAY_COLOR;
