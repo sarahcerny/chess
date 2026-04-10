@@ -165,16 +165,21 @@ public class PostloginUI {
             try {
                 index = Integer.parseInt(params[0]) - 1;
             } catch (NumberFormatException e) {
-                System.out.println("Invalid game number Please enter a number.");
+                System.out.println("Invalid game number.");
                 return;
             }
             if (index < 0 || index >= lastGames.size()) {
-                System.out.println("Invalid game number type 'list' to see available games.");
+                System.out.println("Invalid game number.");
                 return;
             }
             model.GameData gameData = lastGames.get(index);
-            System.out.println("Observing " + gameData.gameName() + ":");
-            client.ChessBoardPrinter.drawBoard(gameData.game(), "WHITE");
+            System.out.println("Observing " + gameData.gameName() + "!");
+            GameplayUI gameplay = new GameplayUI(
+                    facade.getServerUrl(),
+                    facade.getAuthToken(),
+                    gameData.gameID(),
+                    chess.ChessGame.TeamColor.WHITE);
+            gameplay.start();
         } catch (Exception e) {
             printServerError(e);
         }
